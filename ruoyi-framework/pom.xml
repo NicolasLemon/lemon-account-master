@@ -59,6 +59,12 @@
             <artifactId>ruoyi-system</artifactId>
         </dependency>
 
+        <!-- 柠檬账号大师模块 -->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-lemon-account-master</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

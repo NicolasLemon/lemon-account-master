@@ -1,3 +1,10 @@
+/*
+ * @Author: Nicolas·Lemon
+ * @Date: 2023-04-07 08:53:50
+ * @LastEditors: Nicolas·Lemon
+ * @LastEditTime: 2023-04-10 22:16:07
+ * @Description: 路由器
+ */
 import Vue from 'vue'
 import Router from 'vue-router'
 
@@ -68,7 +75,7 @@ export const constantRoutes = [
     children: [
       {
         path: 'index',
-        component: () => import('@/views/index'),
+        component: () => import('@/views/account_master/index'),
         name: 'Index',
         meta: { title: '首页', icon: 'dashboard', affix: true }
       }

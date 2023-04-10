@@ -30,7 +30,7 @@ public class CodeGenerator {
 
         // 需要逆向生成的数据库的表名
         final String[] includeTables = {
-                "diy_user"
+                "lam_account", "lam_user_account"
         };
 
         // 自动填充充字段
@@ -45,7 +45,7 @@ public class CodeGenerator {
         tableFills.add(new Column("update_time", FieldFill.INSERT_UPDATE));
 
         // 快速生成模板
-        FastAutoGenerator.create("jdbc:mysql://localhost:3306/ry_vue?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8"
+        FastAutoGenerator.create("jdbc:mysql://localhost:3306/lemon-account-master?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8"
                         , "root", "root")
                 // 全局配置
                 .globalConfig(builder -> {
@@ -67,7 +67,7 @@ public class CodeGenerator {
                     // 设置父包名
                     builder.parent("com.lemon")
                             /// 设置父包模块名
-                            .moduleName("demo")
+                            .moduleName("account")
                             // 指定实体包名
                             .entity("domain")
                             // 设置mapperXml生成路径
@@ -92,7 +92,7 @@ public class CodeGenerator {
                             // 设置父类
                             .superClass(BaseEntity.class)
                             // 添加父类公共字段
-                            .addSuperEntityColumns("create_by", "create_time", "update_by", "update_time", "remark")
+                            .addSuperEntityColumns("create_by", "create_time", "update_by", "update_time")
                             // 开启 lombok 模型
                             .enableLombok()
                             // 表字段填充
