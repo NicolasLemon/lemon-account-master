@@ -33,4 +33,9 @@ public class UserAccount {
     @TableField(exist = false)
     List<Account> accountList;
 
+    public UserAccount(Long userId, Long accountId) {
+        this.userId = userId;
+        this.accountId = accountId;
+    }
+
 }

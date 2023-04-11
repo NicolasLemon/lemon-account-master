@@ -2,8 +2,8 @@
  * @Author: Nicolas·Lemon
  * @Date: 2023-04-07 09:59:42
  * @LastEditors: Nicolas·Lemon
- * @LastEditTime: 2023-04-10 14:56:12
- * @Description: Do not edit
+ * @LastEditTime: 2023-04-11 18:43:23
+ * @Description: 柠檬账号大师管理页面
 -->
 <template>
   <div class="app-container">
@@ -138,12 +138,21 @@
         class-name="small-padding fixed-width"
       >
         <template slot-scope="scope">
+          <el-tooltip placement="top" content="查看或隐藏密码">
+            <el-button
+              size="mini"
+              type="text"
+              icon="el-icon-view"
+              v-if="scope.row.accountPassword != null"
+              content="aaa"
+              @click="handlePwdView(scope.row)"
+            ></el-button>
+          </el-tooltip>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['account:account:edit']"
             >修改</el-button
           >
           <el-button
@@ -151,7 +160,6 @@
             type="text"
             icon="el-icon-plus"
             @click="handleAdd(scope.row)"
-            v-hasPermi="['account:account:add']"
             >新增</el-button
           >
           <el-button
@@ -159,7 +167,6 @@
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['account:account:remove']"
             >删除</el-button
           >
         </template>
@@ -363,6 +370,20 @@ export default {
         this.refreshTable = true;
       });
     },
+    /** 显示/隐藏密码 */
+    handlePwdView(row) {
+      let pwd = row.accountPassword;
+      if (pwd === null || pwd === "") {
+        return;
+      }
+      if (!/^\*+$/g.test(pwd)) {
+        row.accountPassword = "*********";
+        return;
+      }
+      getAccount(row.accountId).then((response) => {
+        row.accountPassword = response.data.accountPassword;
+      });
+    },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
@@ -414,3 +435,8 @@ export default {
   },
 };
 </script>
+
+<style lang="sass">
+.el-tooltip__popper[x-placement^="top"]
+  opacity: 0.95
+</style>

@@ -3,10 +3,14 @@ package com.lemon.account.service.impl;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import com.lemon.account.domain.Account;
+import com.lemon.account.domain.UserAccount;
 import com.lemon.account.mapper.AccountMapper;
+import com.lemon.account.mapper.UserAccountMapper;
 import com.lemon.account.service.AccountService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ruoyi.common.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
@@ -26,7 +30,12 @@ import java.util.List;
 public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> implements AccountService {
 
     /**
-     * 重写list()方法，屏蔽密码
+     * 账户与用户关联表 Mapper
+     */
+    private final UserAccountMapper userMapper;
+
+    /**
+     * 重写list()方法，拼接内部sql，并屏蔽明文密码
      *
      * @param queryWrapper Wrapper
      * @return 处理后的结果集
@@ -42,12 +51,48 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         // 拼接内部sql
         wrapper.inSql("account_id", "select account_id from lam_user_account");
         List<Account> accountList = super.list(wrapper);
-        // 处理结果集，将密码改为星号
+        // 处理结果集，将密码改为星号或null
         accountList.forEach(a -> {
             if (ObjectUtils.isNotEmpty(a.getAccountPassword())) {
                 a.setAccountPassword("*********");
+            }else {
+                a.setAccountPassword(null);
             }
         });
         return accountList;
     }
+
+    /**
+     * 重写saveOrUpdate()方法，增强关联表插入
+     *
+     * @param entity 账户实体类
+     * @return 是否插入或更新成功
+     */
+    @Override
+    public boolean saveOrUpdate(Account entity) {
+        // 先往账户表中插入或更新一条记录
+        boolean isSavedOrUpdated = super.saveOrUpdate(entity);
+        // 插入或更新不成功，就返回false
+        if (!isSavedOrUpdated) {
+            return false;
+        }
+
+        /// 插入或更新成功，就更新账户与用户关联表
+        // 获取账户id和当前登录用户的id
+        Long accountId = entity.getAccountId();
+        Long userId = SecurityUtils.getUserId();
+        // 通过条件筛选，查询关联表中是否有此记录
+        QueryWrapper<UserAccount> wrapper = new QueryWrapper<>();
+        // 此处不用拼接user_id，因为设置了多租户插件的，会自动拼接user_id
+        wrapper.eq("account_id", accountId);
+        UserAccount user = userMapper.selectOne(wrapper);
+        // 如果关联表中有该记录就不操作了
+        if (ObjectUtils.isNotEmpty(user)) {
+            return true;
+        }
+        // 如果关联表中没有关联的记录就新增该关联项
+        user = new UserAccount(userId, accountId);
+        return SqlHelper.retBool(userMapper.insert(user));
+    }
+
 }
