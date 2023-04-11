@@ -2,7 +2,7 @@
  * @Author: Nicolas·Lemon
  * @Date: 2023-04-07 09:59:42
  * @LastEditors: Nicolas·Lemon
- * @LastEditTime: 2023-04-11 18:43:23
+ * @LastEditTime: 2023-04-11 20:28:09
  * @Description: 柠檬账号大师管理页面
 -->
 <template>
@@ -235,6 +235,8 @@ export default {
   },
   data() {
     return {
+      // 行账户密码临时缓存列表
+      rowPwdList: [],
       // 遮罩层
       loading: true,
       // 显示搜索条件
@@ -373,15 +375,46 @@ export default {
     /** 显示/隐藏密码 */
     handlePwdView(row) {
       let pwd = row.accountPassword;
-      if (pwd === null || pwd === "") {
+      // 密码为空就不处理
+      if (pwd === null) {
         return;
       }
-      if (!/^\*+$/g.test(pwd)) {
-        row.accountPassword = "*********";
+      // 假密码，真密码
+      let fakePwd = null;
+      let realPWd = null;
+      // 判断在rowPwdList是否存在当前行的数据
+      for (let key in this.rowPwdList) {
+        let item = this.rowPwdList[key];
+        if (item.id === row.accountId) {
+          fakePwd = item.fakePwd;
+          realPWd = item.realPwd;
+          break;
+        }
+      }
+
+      // 显示真密码
+      if (fakePwd != null && pwd != fakePwd) {
+        row.accountPassword = fakePwd;
         return;
       }
+
+      // 隐藏真密码
+      if (realPWd != null && pwd != realPWd) {
+        row.accountPassword = realPWd;
+        return;
+      }
+
+      // 第一次点击的时候就调用接口，反之就利用缓存显隐密码
       getAccount(row.accountId).then((response) => {
-        row.accountPassword = response.data.accountPassword;
+        realPWd = response.data.accountPassword;
+        // 将当前行的数据插入到临时缓存列表中去
+        this.rowPwdList.push({
+          id: row.accountId,
+          fakePwd: pwd,
+          realPwd: realPWd,
+        });
+        // 显示真密码
+        row.accountPassword = realPWd;
       });
     },
     /** 修改按钮操作 */

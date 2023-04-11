@@ -11,6 +11,7 @@ import com.lemon.account.mapper.UserAccountMapper;
 import com.lemon.account.service.AccountService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.common.utils.SecurityUtils;
+import com.ruoyi.common.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
@@ -42,24 +43,38 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
      */
     @Override
     public List<Account> list(Wrapper<Account> queryWrapper) {
+        // 需要将真密码替换成的假密码
+        final String fakePwd = "*********";
+
         // 将Wrapper强制转换成QueryWrapper
         QueryWrapper<Account> wrapper = (QueryWrapper<Account>) queryWrapper;
         // 如果传入的是Wrappers.emptyWrapper()的话，就构造新的QueryWrapper
         if (queryWrapper.equals(Wrappers.emptyWrapper())) {
             wrapper = new QueryWrapper<>();
         }
+
         // 拼接内部sql
         wrapper.inSql("account_id", "select account_id from lam_user_account");
         List<Account> accountList = super.list(wrapper);
         // 处理结果集，将密码改为星号或null
-        accountList.forEach(a -> {
-            if (ObjectUtils.isNotEmpty(a.getAccountPassword())) {
-                a.setAccountPassword("*********");
-            }else {
-                a.setAccountPassword(null);
-            }
-        });
+        accountList.forEach(a -> a.setAccountPassword(StringUtils.isNotEmpty(a.getAccountPassword()) ? fakePwd : null));
+
         return accountList;
+    }
+
+    /**
+     * 重写getOne()方法，增强条件查询
+     *
+     * @param queryWrapper Wrapper
+     * @param throwEx      是否抛出异常
+     * @return 查询结果
+     */
+    @Override
+    public Account getOne(Wrapper<Account> queryWrapper, boolean throwEx) {
+        // 拼接内部sql
+        QueryWrapper<Account> wrapper = (QueryWrapper<Account>) queryWrapper;
+        wrapper.inSql("account_id", "select account_id from lam_user_account");
+        return super.getOne(wrapper, throwEx);
     }
 
     /**
@@ -90,6 +105,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         if (ObjectUtils.isNotEmpty(user)) {
             return true;
         }
+
         // 如果关联表中没有关联的记录就新增该关联项
         user = new UserAccount(userId, accountId);
         return SqlHelper.retBool(userMapper.insert(user));

@@ -1,8 +1,10 @@
 package com.lemon.account.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lemon.account.domain.Account;
 import com.lemon.account.service.impl.AccountServiceImpl;
+import com.ruoyi.common.annotation.RepeatSubmit;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +31,7 @@ public class AccountController extends BaseController {
     /**
      * 分页查询账号列表
      *
-     * @return 分页查询的结果集（密码密码已做脱敏处理）
+     * @return 分页查询的结果集（数据已做脱敏处理）
      */
     @GetMapping("/accounts")
     public AjaxResult listAccounts() {
@@ -38,8 +40,11 @@ public class AccountController extends BaseController {
     }
 
     @GetMapping("/account/{id}")
+    @RepeatSubmit(message = "请求过于频繁（两次请求小于5s）")
     public AjaxResult getAccountByAccountId(@PathVariable("id") String accountId) {
-        return success(accountService.getById(accountId));
+        QueryWrapper<Account> wrapper = new QueryWrapper<>();
+        wrapper.eq("account_id", accountId);
+        return success(accountService.getOne(wrapper));
     }
 
     @PostMapping("/add")
