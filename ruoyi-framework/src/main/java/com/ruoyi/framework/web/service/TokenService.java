@@ -5,7 +5,9 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 
-import com.ruoyi.common.utils.KeyUtils;
+import com.lemon.account.domain.AesKey;
+import com.lemon.account.domain.UserAesKey;
+import com.lemon.account.mapper.UserAesKeyMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -50,6 +52,11 @@ public class TokenService {
     private static final Long MILLIS_MINUTE_TEN = 20 * 60 * 1000L;
 
     private final RedisCache redisCache;
+
+    /**
+     * AES用户密钥 Mapper
+     */
+    private final UserAesKeyMapper userAesKeyMapper;
 
     /**
      * 获取用户身份信息
@@ -101,6 +108,10 @@ public class TokenService {
     public String createToken(LoginUser loginUser) {
         String token = IdUtils.fastUUID();
         loginUser.setToken(token);
+
+        // 设置用户AES密钥
+        setUserAesKey(loginUser);
+
         setUserAgent(loginUser);
         refreshToken(loginUser);
 
@@ -131,13 +142,23 @@ public class TokenService {
     public void refreshToken(LoginUser loginUser) {
         loginUser.setLoginTime(System.currentTimeMillis());
         loginUser.setExpireTime(loginUser.getLoginTime() + expireTime * MILLIS_MINUTE);
-        // 设置用户唯一对应的AES加解密的密钥（柠檬账户管理大师）
-        String key = "TRBuX0XCDpcdCYaGnzjY8M#4NA!O2e7r";
-        key = KeyUtils.aes256Encode(key);
-        loginUser.getUser().setUserAesKey(key);
         // 根据uuid将loginUser缓存
         String userKey = getTokenKey(loginUser.getToken());
         redisCache.setCacheObject(userKey, loginUser, expireTime, TimeUnit.MINUTES);
+    }
+
+    /**
+     * 设置用户AES密钥信息
+     *
+     * @param loginUser 登录信息
+     */
+    private void setUserAesKey(LoginUser loginUser) {
+        // 根据当前登录用户的ID获取用户与密钥关联表的记录
+        UserAesKey userAesKey = userAesKeyMapper.selectById(loginUser.getUserId());
+        // 获取关联表中密钥实体类对象
+        AesKey aesKey = userAesKey.getAesKey();
+        // 设置密钥
+        loginUser.getUser().setUserAesKey(aesKey.getAesKey());
     }
 
     /**

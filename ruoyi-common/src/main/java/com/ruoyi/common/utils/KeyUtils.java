@@ -74,12 +74,8 @@ public class KeyUtils {
             return content;
         }
         // 若key和keyIv是空的话，就使用默认的key和keyIv
-        if (StringUtils.isEmpty(key)) {
-            key = DEFAULT_KEY;
-        }
-        if (StringUtils.isEmpty(keyIv)) {
-            keyIv = DEFAULT_KEY_IV;
-        }
+        key = StringUtils.isEmpty(key) ? DEFAULT_KEY : key;
+        keyIv = StringUtils.isEmpty(keyIv) ? DEFAULT_KEY_IV : keyIv;
 
         try {
             SecretKey secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), AES);
@@ -112,12 +108,8 @@ public class KeyUtils {
             return content;
         }
         // 若key和keyIv是空的话，就使用默认的key和keyIv
-        if (StringUtils.isEmpty(key)) {
-            key = DEFAULT_KEY;
-        }
-        if (StringUtils.isEmpty(keyIv)) {
-            keyIv = DEFAULT_KEY_IV;
-        }
+        key = StringUtils.isEmpty(key) ? DEFAULT_KEY : key;
+        keyIv = StringUtils.isEmpty(keyIv) ? DEFAULT_KEY_IV : keyIv;
 
         try {
             SecretKey secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), AES);

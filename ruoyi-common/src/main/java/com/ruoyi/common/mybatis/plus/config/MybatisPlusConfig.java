@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 /**
  * MyBatis-Plus 配置类
  *
+ * @author https://blog.csdn.net/Michelle_Zhong/article/details/123926533
  * @author 尼古拉斯·柠檬
  * @since 2023/4/10
  */
@@ -30,7 +31,7 @@ public class MybatisPlusConfig {
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
 
-        // 多租户插件配置，https://blog.csdn.net/Michelle_Zhong/article/details/123926533
+        // 多租户插件配置
         interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(new TenantLineHandler() {
             /**
              * 获取租户ID

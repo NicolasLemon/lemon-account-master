@@ -30,7 +30,7 @@ public class CodeGenerator {
 
         // 需要逆向生成的数据库的表名
         final String[] includeTables = {
-                "lam_account", "lam_user_account"
+                "lam_aes_key", "lam_user_aes_key"
         };
 
         // 自动填充充字段
@@ -78,7 +78,7 @@ public class CodeGenerator {
                     // 设置需要生成的表名（包含）
                     builder.addInclude(includeTables)
                             // 设置过滤表前缀
-                            .addTablePrefix("t_", "c_")
+                            .addTablePrefix("t_", "c_", "lam_")
                             // Controller策略配置
                             .controllerBuilder()
                             // 开启生成@RestController控制器
@@ -87,12 +87,14 @@ public class CodeGenerator {
                             .entityBuilder()
                             // 开启链式模型
                             .enableChainModel()
-                            // 禁用生成 serialVersionUID
-                            .disableSerialVersionUID()
-                            // 设置父类
-                            .superClass(BaseEntity.class)
-                            // 添加父类公共字段
-                            .addSuperEntityColumns("create_by", "create_time", "update_by", "update_time")
+                            /// 禁用生成 serialVersionUID
+                            //.disableSerialVersionUID()
+                            /*
+                                // 设置父类
+                                .superClass(BaseEntity.class)
+                                // 添加父类公共字段
+                                .addSuperEntityColumns("create_by", "create_time", "update_by", "update_time")
+                            */
                             // 开启 lombok 模型
                             .enableLombok()
                             // 表字段填充

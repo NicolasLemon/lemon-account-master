@@ -19,6 +19,14 @@
             <artifactId>ruoyi-common</artifactId>
         </dependency>
 
+        <!-- junit4单元测试 -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.1</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <properties>

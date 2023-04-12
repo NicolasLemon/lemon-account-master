@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -18,7 +19,9 @@ import java.util.List;
 @Data
 @Accessors(chain = true)
 @TableName("lam_user_account")
-public class UserAccount {
+public class UserAccount implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * 用户ID
