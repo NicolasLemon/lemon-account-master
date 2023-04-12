@@ -23,6 +23,12 @@
             <artifactId>ruoyi-common</artifactId>
         </dependency>
 
+        <!-- 柠檬账号管理大师 -->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-lemon-account-master</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

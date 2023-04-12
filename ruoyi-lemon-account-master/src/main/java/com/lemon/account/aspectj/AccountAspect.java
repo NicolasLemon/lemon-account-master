@@ -69,12 +69,7 @@ public class AccountAspect {
             Account account = (Account) pointArg;
             // 如果原对象中有keyIv的值的话，就延用该值
             String keyIv = account.getAccountKeyIv();
-            if (StringUtils.isNotEmpty(keyIv)) {
-                keyIv = new String(Base64.decode(keyIv));
-            } else {
-                // 反之就随机生成偏移量
-                keyIv = KeyUtils.generateKey(16);
-            }
+            keyIv = StringUtils.isNotEmpty(keyIv) ? new String(Base64.decode(keyIv)) : KeyUtils.generateKey(16);
             account.setAccountName(KeyUtils.aes256Encode(userAesKey, keyIv, account.getAccountName()));
             account.setAccountPassword(KeyUtils.aes256Encode(userAesKey, keyIv, account.getAccountPassword()));
             account.setAccountInfo(KeyUtils.aes256Encode(userAesKey, keyIv, account.getAccountInfo()));
