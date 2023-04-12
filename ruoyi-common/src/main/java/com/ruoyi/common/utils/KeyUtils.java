@@ -1,7 +1,6 @@
-package com.lemon.account.utils;
+package com.ruoyi.common.utils;
 
 
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.sign.Base64;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,23 +11,27 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 
 /**
- * AES256加解密，固定key值，但需指定随机的偏移量iv
+ * AES256加解密 工具类
  *
  * @author https://www.cnblogs.com/xxoome/p/13927481.html
  * @author Nicolas·Lemon
  * @since 2023/04/11
  */
 @Slf4j
+@SuppressWarnings("unused")
 public class KeyUtils {
 
     private static final String AES = "AES";
 
     /**
-     * 默认密钥, 256位32个字节
-     * 初始向量IV, 初始向量IV的长度规定为128位16个字节,
-     * 初始向量的来源为 generateKey() 随机生成。
+     * 默认密钥（32个字节）
      */
     private static final String DEFAULT_KEY = "TRBuX0XCDpcdCYaGnzjY8M#4NA!O2e7r";
+
+    /**
+     * 默认偏移量（16个字节）
+     */
+    private static final String DEFAULT_KEY_IV = "DpcdCYaGnz!jYO#e";
 
     /**
      * 加密解密算法/加密模式/填充方式
@@ -39,20 +42,47 @@ public class KeyUtils {
         java.security.Security.setProperty("crypto.policy", "unlimited");
     }
 
+
     /**
-     * AES256加密
+     * AES256加密（默认密钥和偏移量）
      *
+     * @param content 加密内容
+     */
+    public static String aes256Encode(String content) {
+        return aes256Encode(null, null, content);
+    }
+
+    /**
+     * AES256解密（默认密钥和偏移量）
+     *
+     * @param content 解密内容
+     */
+    public static String aes256Decode(String content) {
+        return aes256Decode(null, null, content);
+    }
+
+    /**
+     * AES256加密（自定义密钥和偏移量）
+     *
+     * @param key     密钥
      * @param keyIv   偏移量
      * @param content 加密内容
      */
-    public static String aes256Encode(String keyIv, String content) {
+    public static String aes256Encode(String key, String keyIv, String content) {
         // 不处理空字符串
         if (StringUtils.isEmpty(content)) {
             return content;
         }
+        // 若key和keyIv是空的话，就使用默认的key和keyIv
+        if (StringUtils.isEmpty(key)) {
+            key = DEFAULT_KEY;
+        }
+        if (StringUtils.isEmpty(keyIv)) {
+            keyIv = DEFAULT_KEY_IV;
+        }
 
         try {
-            SecretKey secretKey = new SecretKeySpec(DEFAULT_KEY.getBytes(StandardCharsets.UTF_8), AES);
+            SecretKey secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), AES);
             Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(keyIv.getBytes(StandardCharsets.UTF_8)));
             // 获取加密内容的字节数组(这里要设置为utf-8)不然内容中如果有中文和英文混合中文就会解密为乱码
@@ -70,19 +100,27 @@ public class KeyUtils {
     }
 
     /**
-     * AES256解密
+     * AES256解密（自定义密钥和偏移量）
      *
+     * @param key     密钥
      * @param keyIv   偏移量
      * @param content 解密内容
      */
-    public static String aes256Decode(String keyIv, String content) {
+    public static String aes256Decode(String key, String keyIv, String content) {
         // 不处理空字符串
         if (StringUtils.isEmpty(content)) {
             return content;
         }
+        // 若key和keyIv是空的话，就使用默认的key和keyIv
+        if (StringUtils.isEmpty(key)) {
+            key = DEFAULT_KEY;
+        }
+        if (StringUtils.isEmpty(keyIv)) {
+            keyIv = DEFAULT_KEY_IV;
+        }
 
         try {
-            SecretKey secretKey = new SecretKeySpec(DEFAULT_KEY.getBytes(StandardCharsets.UTF_8), AES);
+            SecretKey secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), AES);
             Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(keyIv.getBytes(StandardCharsets.UTF_8)));
             // 将编码成Base64后的密文解码成字节数组

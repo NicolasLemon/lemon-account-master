@@ -47,6 +47,18 @@ public class SecurityUtils {
     }
 
     /**
+     * 获取用户AES默认密钥
+     */
+    public static String getUserAesKey() {
+        try {
+            String userAesKey = getLoginUser().getUser().getUserAesKey();
+            return KeyUtils.aes256Decode(userAesKey);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
      * 获取用户账户
      **/
     public static String getUsername() {

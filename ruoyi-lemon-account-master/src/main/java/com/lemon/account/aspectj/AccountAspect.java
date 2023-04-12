@@ -1,7 +1,8 @@
 package com.lemon.account.aspectj;
 
 import com.lemon.account.domain.Account;
-import com.lemon.account.utils.KeyUtils;
+import com.ruoyi.common.utils.KeyUtils;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.sign.Base64;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,16 @@ import java.util.List;
 @Slf4j
 @SuppressWarnings("rawtypes")
 public class AccountAspect {
+
+    /**
+     * 用户唯一对应的AES密钥
+     */
+    private static final String userAesKey;
+
+    static {
+        // 通过缓存获取用户唯一对应的AES密钥
+        userAesKey = SecurityUtils.getUserAesKey();
+    }
 
     /**
      * 查询账户后置执行增强
@@ -64,10 +75,10 @@ public class AccountAspect {
                 // 反之就随机生成偏移量
                 keyIv = KeyUtils.generateKey(16);
             }
-            account.setAccountName(KeyUtils.aes256Encode(keyIv, account.getAccountName()));
-            account.setAccountPassword(KeyUtils.aes256Encode(keyIv, account.getAccountPassword()));
-            account.setAccountInfo(KeyUtils.aes256Encode(keyIv, account.getAccountInfo()));
-            account.setAccountDomain(KeyUtils.aes256Encode(keyIv, account.getAccountDomain()));
+            account.setAccountName(KeyUtils.aes256Encode(userAesKey, keyIv, account.getAccountName()));
+            account.setAccountPassword(KeyUtils.aes256Encode(userAesKey, keyIv, account.getAccountPassword()));
+            account.setAccountInfo(KeyUtils.aes256Encode(userAesKey, keyIv, account.getAccountInfo()));
+            account.setAccountDomain(KeyUtils.aes256Encode(userAesKey, keyIv, account.getAccountDomain()));
             keyIv = Base64.encode(keyIv.getBytes(StandardCharsets.UTF_8));
             account.setAccountKeyIv(keyIv);
         }
@@ -95,13 +106,13 @@ public class AccountAspect {
         // Base64解码偏移量
         keyIv = new String(Base64.decode(keyIv));
         // 解密账户名
-        account.setAccountName(KeyUtils.aes256Decode(keyIv, account.getAccountName()));
+        account.setAccountName(KeyUtils.aes256Decode(userAesKey, keyIv, account.getAccountName()));
         // 解密账户密码
-        account.setAccountPassword(KeyUtils.aes256Decode(keyIv, account.getAccountPassword()));
+        account.setAccountPassword(KeyUtils.aes256Decode(userAesKey, keyIv, account.getAccountPassword()));
         // 解密账户说明
-        account.setAccountInfo(KeyUtils.aes256Decode(keyIv, account.getAccountInfo()));
+        account.setAccountInfo(KeyUtils.aes256Decode(userAesKey, keyIv, account.getAccountInfo()));
         // 解密账户所属域名
-        account.setAccountDomain(KeyUtils.aes256Decode(keyIv, account.getAccountDomain()));
+        account.setAccountDomain(KeyUtils.aes256Decode(userAesKey, keyIv, account.getAccountDomain()));
         // 等解密完成后将偏移量置为空（不给用户查看到偏移量）
         account.setAccountKeyIv(null);
     }
