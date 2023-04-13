@@ -75,4 +75,10 @@ CREATE TABLE `lam_user_aes_key`  (
   PRIMARY KEY (`user_id`, `key_id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '柠檬账号大师 - 用户和AES密钥关联表' ROW_FORMAT = Dynamic;
 
+-- ----------------------------
+-- Records of lam_user_aes_key
+-- ----------------------------
+INSERT INTO `lam_user_aes_key` VALUES (1, 1);
+INSERT INTO `lam_user_aes_key` VALUES (2, 2);
+
 SET FOREIGN_KEY_CHECKS = 1;

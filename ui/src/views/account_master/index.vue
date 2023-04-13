@@ -2,7 +2,7 @@
  * @Author: Nicolas·Lemon
  * @Date: 2023-04-07 09:59:42
  * @LastEditors: Nicolas·Lemon
- * @LastEditTime: 2023-04-13 15:31:14
+ * @LastEditTime: 2023-04-13 19:25:29
  * @Description: 柠檬账号大师管理页面
 -->
 <template>
@@ -165,6 +165,14 @@
       </el-table-column>
     </el-table>
 
+    <pagination
+      v-show="total > 0"
+      :total="total"
+      :page.sync="queryParams.pageNum"
+      :limit.sync="queryParams.pageSize"
+      @pagination="getList"
+    />
+
     <!-- 添加或修改柠檬账号大师账号对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
@@ -226,6 +234,8 @@ export default {
       showSearch: true,
       // 柠檬账号大师账号表格数据
       accountList: [],
+      // 总条数
+      total: 0,
       // 柠檬账号大师账号树选项
       accountOptions: [],
       // 弹出层标题
@@ -265,10 +275,11 @@ export default {
       this.loading = true;
       listAccount(this.queryParams).then((response) => {
         this.accountList = this.handleTree(
-          response.data,
+          response.rows,
           "accountId",
           "parentId"
         );
+        this.total = response.total;
         this.loading = false;
       });
     },
@@ -288,7 +299,7 @@ export default {
       listAccount().then((response) => {
         this.accountOptions = [];
         const data = { accountId: 0, accountName: "顶级节点", children: [] };
-        data.children = this.handleTree(response.data, "accountId", "parentId");
+        data.children = this.handleTree(response.rows, "accountId", "parentId");
         this.accountOptions.push(data);
       });
     },
