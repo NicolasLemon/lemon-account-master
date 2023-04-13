@@ -154,7 +154,7 @@ public class TokenService {
      */
     private void setUserAesKey(LoginUser loginUser) {
         // 根据当前登录用户的ID获取用户与密钥关联表的记录
-        UserAesKey userAesKey = userAesKeyMapper.selectById(loginUser.getUserId());
+        UserAesKey userAesKey = userAesKeyMapper.selectByUserId(loginUser.getUserId());
         // 获取关联表中密钥实体类对象
         AesKey aesKey = userAesKey.getAesKey();
         // 设置密钥

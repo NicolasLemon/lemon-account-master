@@ -1,12 +1,20 @@
 package com.ruoyi.system.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.Validator;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.lemon.account.domain.AesKey;
+import com.lemon.account.domain.UserAccount;
 import com.lemon.account.domain.UserAesKey;
-import com.lemon.account.service.impl.UserAesKeyServiceImpl;
+import com.lemon.account.mapper.AccountMapper;
+import com.lemon.account.mapper.AesKeyMapper;
+import com.lemon.account.mapper.UserAccountMapper;
+import com.lemon.account.mapper.UserAesKeyMapper;
+import com.ruoyi.common.utils.KeyUtils;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,9 +66,24 @@ public class SysUserServiceImpl implements ISysUserService {
     protected final Validator validator;
 
     /**
-     * 用户AES密钥与用户关联 Service
+     * 柠檬账号大师 - AES密钥 Mapper
      */
-    private final UserAesKeyServiceImpl userAesKeyService;
+    private final AesKeyMapper aesKeyMapper;
+
+    /**
+     * 柠檬账号大师 - AES密钥与用户关联 Mapper
+     */
+    private final UserAesKeyMapper userAesKeyMapper;
+
+    /**
+     * 柠檬账户大师 - 账号 Mapper
+     */
+    private final AccountMapper accountMapper;
+
+    /**
+     * 柠檬账号大师 - 账号与用户关联 Mapper
+     */
+    private final UserAccountMapper userAccountMapper;
 
     /**
      * 根据条件分页查询用户列表
@@ -363,11 +386,24 @@ public class SysUserServiceImpl implements ISysUserService {
      *
      * @param user 用户对象
      */
-    @Transactional
     public void insertUserAesKey(SysUser user) {
+        // 密钥表新增一条密钥
+        AesKey aesKey = new AesKey();
+        // 生成一个32位随机密钥，并加密该密钥
+        String key = KeyUtils.aes256Encode(KeyUtils.generateKey(32));
+        aesKey.setAesKey(key);
+        aesKeyMapper.insert(aesKey);
+
+        // 查询一遍数据库，找到刚刚插入的Key值的id，并同步插入用户与密钥的关联表中
+        QueryWrapper<AesKey> wrapper = new QueryWrapper<>();
+        wrapper.eq("aes_key", aesKey.getAesKey());
+        AesKey selectOne = aesKeyMapper.selectOne(wrapper);
+
         UserAesKey userAesKey = new UserAesKey();
         userAesKey.setUserId(user.getUserId());
-        userAesKeyService.save(userAesKey);
+        userAesKey.setKeyId(selectOne.getKeyId());
+
+        userAesKeyMapper.insert(userAesKey);
     }
 
     /**
@@ -423,6 +459,10 @@ public class SysUserServiceImpl implements ISysUserService {
         userRoleMapper.deleteUserRoleByUserId(userId);
         // 删除用户与岗位表
         userPostMapper.deleteUserPostByUserId(userId);
+        // 删除用户与柠檬大师账户相关关联的表
+        Long[] userIds=new Long[1];
+        userIds[0]=userId;
+        this.deleteLemonAccountByUserIds(userIds);
         return userMapper.deleteUserById(userId);
     }
 
@@ -443,7 +483,26 @@ public class SysUserServiceImpl implements ISysUserService {
         userRoleMapper.deleteUserRole(userIds);
         // 删除用户与岗位关联
         userPostMapper.deleteUserPost(userIds);
+        deleteLemonAccountByUserIds(userIds);
         return userMapper.deleteUserByIds(userIds);
+    }
+
+    private void deleteLemonAccountByUserIds(Long[] userIds) {
+        // 删除账号表、用户与账号关联表记录
+        List<Long> userIdList = Arrays.asList(userIds);
+        QueryWrapper<UserAccount> wrapper1 = new QueryWrapper<>();
+        wrapper1.in("user_id", userIdList);
+        List<UserAccount> userAccounts = userAccountMapper.selectList(wrapper1);
+        List<Long> accountIdList = userAccounts.stream().map(UserAccount::getAccountId).collect(Collectors.toList());
+        accountMapper.deleteByIds(accountIdList);
+        userAccountMapper.delete(wrapper1);
+        // 删除密钥表与用户密钥关联表
+        QueryWrapper<UserAesKey> wrapper2 = new QueryWrapper<>();
+        wrapper2.in("user_id", userIdList);
+        List<UserAesKey> userAesKeys = userAesKeyMapper.selectList(wrapper2);
+        List<Long> keyIdList = userAesKeys.stream().map(UserAesKey::getKeyId).collect(Collectors.toList());
+        aesKeyMapper.deleteBatchIds(keyIdList);
+        userAesKeyMapper.delete(wrapper2);
     }
 
     /**

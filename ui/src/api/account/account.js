@@ -2,7 +2,7 @@
  * @Author: Nicolas·Lemon
  * @Date: 2023-04-07 09:59:33
  * @LastEditors: Nicolas·Lemon
- * @LastEditTime: 2023-04-10 22:16:27
+ * @LastEditTime: 2023-04-13 16:53:15
  * @Description: API接口
  */
 import request from '@/utils/request'
@@ -10,7 +10,7 @@ import request from '@/utils/request'
 // 查询柠檬账号大师账号列表
 export function listAccount(query) {
   return request({
-    url: '/account/accounts',
+    url: '/lam/accounts',
     method: 'get',
     params: query
   })
@@ -19,7 +19,7 @@ export function listAccount(query) {
 // 查询柠檬账号大师账号详细
 export function getAccount(accountId) {
   return request({
-    url: '/account/account/' + accountId,
+    url: '/lam/account/' + accountId,
     method: 'get'
   })
 }
@@ -27,7 +27,7 @@ export function getAccount(accountId) {
 // 新增柠檬账号大师账号
 export function addAccount(data) {
   return request({
-    url: '/account/account',
+    url: '/lam/account/add',
     method: 'post',
     data: data
   })
@@ -36,8 +36,8 @@ export function addAccount(data) {
 // 修改柠檬账号大师账号
 export function updateAccount(data) {
   return request({
-    url: '/account/account',
-    method: 'put',
+    url: '/lam/account/update',
+    method: 'post',
     data: data
   })
 }
@@ -45,7 +45,7 @@ export function updateAccount(data) {
 // 删除柠檬账号大师账号
 export function delAccount(accountId) {
   return request({
-    url: '/account/account/' + accountId,
-    method: 'delete'
+    url: '/lam/account/delete/' + accountId,
+    method: 'post'
   })
 }

@@ -3,8 +3,6 @@ package com.lemon.account.domain;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 
-import java.io.Serializable;
-
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -19,9 +17,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 @TableName("lam_user_aes_key")
-public class UserAesKey implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class UserAesKey {
 
     /**
      * 用户ID

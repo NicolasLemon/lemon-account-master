@@ -4,19 +4,19 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.lemon.account.domain.Account">
-        <id column="account_id" property="accountId" />
-        <result column="create_by" property="createBy" />
-        <result column="create_time" property="createTime" />
-        <result column="update_by" property="updateBy" />
-        <result column="update_time" property="updateTime" />
-        <result column="parent_id" property="parentId" />
-        <result column="ancestors" property="ancestors" />
-        <result column="account_name" property="accountName" />
-        <result column="account_password" property="accountPassword" />
-        <result column="account_key_iv" property="accountKeyIv" />
-        <result column="account_info" property="accountInfo" />
-        <result column="account_domain" property="accountDomain" />
-        <result column="del_flag" property="delFlag" />
+        <id column="account_id" property="accountId"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="ancestors" property="ancestors"/>
+        <result column="account_name" property="accountName"/>
+        <result column="account_password" property="accountPassword"/>
+        <result column="account_key_iv" property="accountKeyIv"/>
+        <result column="account_info" property="accountInfo"/>
+        <result column="account_domain" property="accountDomain"/>
+        <result column="del_flag" property="delFlag"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -27,5 +27,17 @@
         update_time,
         account_id, parent_id, ancestors, account_name, account_password, account_key_iv, account_info, account_domain, del_flag
     </sql>
+
+    <delete id="deleteByIds" parameterType="list">
+        delete from lam_account where account_id
+        <if test="ids != null and ids.size() > 0">
+            <foreach collection="ids" item="accountId" open="in(" separator="," close=")">
+                #{accountId}
+            </foreach>
+        </if>
+        <if test="ids == null or ids.size() == 0">
+            =-1
+        </if>
+    </delete>
 
 </mapper>

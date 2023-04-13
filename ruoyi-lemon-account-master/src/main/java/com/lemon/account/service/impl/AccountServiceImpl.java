@@ -54,7 +54,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         }
 
         // 拼接内部sql
-        wrapper.inSql("account_id", "select account_id from lam_user_account");
+        wrapper.inSql("account_id", "select account_id from lam_user_account where user_id=" + SecurityUtils.getUserId());
         List<Account> accountList = super.list(wrapper);
         // 处理结果集，将密码改为星号或null
         accountList.forEach(a -> a.setAccountPassword(StringUtils.isNotEmpty(a.getAccountPassword()) ? fakePwd : null));
@@ -73,7 +73,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     public Account getOne(Wrapper<Account> queryWrapper, boolean throwEx) {
         // 拼接内部sql
         QueryWrapper<Account> wrapper = (QueryWrapper<Account>) queryWrapper;
-        wrapper.inSql("account_id", "select account_id from lam_user_account");
+        wrapper.inSql("account_id", "select account_id from lam_user_account where user_id=" + SecurityUtils.getUserId());
         return super.getOne(wrapper, throwEx);
     }
 
@@ -86,6 +86,10 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     @Override
     public boolean saveOrUpdate(Account entity) {
         // 先往账户表中插入或更新一条记录
+        entity.setCreateBy(null);
+        entity.setCreateTime(null);
+        entity.setUpdateBy(null);
+        entity.setUpdateTime(null);
         boolean isSavedOrUpdated = super.saveOrUpdate(entity);
         // 插入或更新不成功，就返回false
         if (!isSavedOrUpdated) {
@@ -98,8 +102,8 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         Long userId = SecurityUtils.getUserId();
         // 通过条件筛选，查询关联表中是否有此记录
         QueryWrapper<UserAccount> wrapper = new QueryWrapper<>();
-        // 此处不用拼接user_id，因为设置了多租户插件的，会自动拼接user_id
-        wrapper.eq("account_id", accountId);
+        wrapper.eq("user_id", userId)
+                .eq("account_id", accountId);
         UserAccount user = userMapper.selectOne(wrapper);
         // 如果关联表中有该记录就不操作了
         if (ObjectUtils.isNotEmpty(user)) {

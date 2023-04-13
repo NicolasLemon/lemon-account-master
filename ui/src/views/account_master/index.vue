@@ -2,7 +2,7 @@
  * @Author: Nicolas·Lemon
  * @Date: 2023-04-07 09:59:42
  * @LastEditors: Nicolas·Lemon
- * @LastEditTime: 2023-04-11 20:28:09
+ * @LastEditTime: 2023-04-13 15:31:14
  * @Description: 柠檬账号大师管理页面
 -->
 <template>
@@ -93,7 +93,6 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          v-hasPermi="['account:account:add']"
           >新增</el-button
         >
       </el-col>
@@ -121,15 +120,8 @@
       :default-expand-all="isExpandAll"
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
     >
-      <!-- <el-table-column label="父账号id" prop="parentId" /> -->
-      <!-- <el-table-column label="祖级列表" align="center" prop="ancestors" /> -->
       <el-table-column label="账户名称" prop="accountName" />
       <el-table-column label="账户密码" align="center" prop="accountPassword" />
-      <!-- <el-table-column
-        label="账户key值偏移量iv"
-        align="center"
-        prop="accountKeyIv"
-      /> -->
       <el-table-column label="账户说明" align="center" prop="accountInfo" />
       <el-table-column label="账户域名" align="center" prop="accountDomain" />
       <el-table-column
@@ -176,12 +168,12 @@
     <!-- 添加或修改柠檬账号大师账号对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="父账号id" prop="parentId">
+        <el-form-item label="父级节点" prop="parentId">
           <treeselect
             v-model="form.parentId"
             :options="accountOptions"
             :normalizer="normalizer"
-            placeholder="请选择父账号id"
+            placeholder="请选择父级节点"
           />
         </el-form-item>
         <el-form-item label="账户名称" prop="accountName">
@@ -193,20 +185,11 @@
             placeholder="请输入账户密码"
           />
         </el-form-item>
-        <el-form-item label="账户key值偏移量iv" prop="accountKeyIv">
-          <el-input
-            v-model="form.accountKeyIv"
-            placeholder="请输入账户key值偏移量iv"
-          />
-        </el-form-item>
         <el-form-item label="账户说明" prop="accountInfo">
           <el-input v-model="form.accountInfo" placeholder="请输入账户说明" />
         </el-form-item>
         <el-form-item label="账户域名" prop="accountDomain">
           <el-input v-model="form.accountDomain" placeholder="请输入账户域名" />
-        </el-form-item>
-        <el-form-item label="删除标志" prop="delFlag">
-          <el-input v-model="form.delFlag" placeholder="请输入删除标志" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -269,16 +252,6 @@ export default {
       rules: {
         accountName: [
           { required: true, message: "账户名称不能为空", trigger: "blur" },
-        ],
-        accountPassword: [
-          { required: true, message: "账户密码不能为空", trigger: "blur" },
-        ],
-        accountKeyIv: [
-          {
-            required: true,
-            message: "账户key值偏移量iv不能为空",
-            trigger: "blur",
-          },
         ],
       },
     };

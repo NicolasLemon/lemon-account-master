@@ -4,6 +4,8 @@ import com.lemon.account.domain.Account;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.*;
 
+import java.util.List;
+
 /**
  * <p>
  * 柠檬账号大师 - 账号表 Mapper 接口
@@ -14,4 +16,8 @@ import org.apache.ibatis.annotations.*;
  */
 @Mapper
 public interface AccountMapper extends BaseMapper<Account> {
+    /**
+     * 通过账户id批量删除账户（delete语句）
+     */
+    int deleteByIds(@Param("ids") List<Long> accountIds);
 }

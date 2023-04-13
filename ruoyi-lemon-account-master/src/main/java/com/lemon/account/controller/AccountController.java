@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
  * @since 2023/04/07
  */
 @RestController
-@RequestMapping("/account")
+@RequestMapping("/lam")
 @RequiredArgsConstructor
 public class AccountController extends BaseController {
 
@@ -39,6 +39,11 @@ public class AccountController extends BaseController {
         return success(accountService.list());
     }
 
+    /**
+     * 通过账户id获取账户信息
+     *
+     * @param accountId 账户id
+     */
     @GetMapping("/account/{id}")
     @RepeatSubmit(message = "请求过于频繁（两次请求小于5s）")
     public AjaxResult getAccountByAccountId(@PathVariable("id") String accountId) {
@@ -47,14 +52,11 @@ public class AccountController extends BaseController {
         return success(accountService.getOne(wrapper));
     }
 
-    @PostMapping("/add")
-    public AjaxResult addAccount() {
-        Account account = new Account();
-        account.setAccountId(203L);
-        account.setAccountName("二级名称2");
-        account.setAccountPassword("二级密码2");
-        account.setAccountDomain("二级域名2");
-        account.setAccountInfo("二级说明2");
+    /**
+     * 增加或者修改账户大师账户
+     */
+    @PostMapping({"/account/add", "/account/update"})
+    public AjaxResult addAccount(@RequestBody Account account) {
         return toAjax(accountService.saveOrUpdate(account));
     }
 

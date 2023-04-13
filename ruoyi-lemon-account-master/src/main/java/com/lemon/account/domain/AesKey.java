@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -37,12 +36,6 @@ public class AesKey implements Serializable {
      * AES密钥
      */
     private String aesKey;
-
-    /**
-     * 删除标志（0代表存在 2代表删除）
-     */
-    @TableLogic
-    private String delFlag;
 
     /**
      * 创建时间
