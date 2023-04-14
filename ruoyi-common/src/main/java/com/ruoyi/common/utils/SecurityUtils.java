@@ -25,17 +25,6 @@ public class SecurityUtils {
     }
 
     /**
-     * 获取多租户ID，实际上是当前登录的用户ID
-     */
-    public static Long getTenantId() {
-        try {
-            return getLoginUser().getUserId();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    /**
      * 获取部门ID
      **/
     public static Long getDeptId() {
