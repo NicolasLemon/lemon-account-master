@@ -24,7 +24,7 @@ import java.util.List;
 @Aspect
 @Component
 @Slf4j
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "unused"})
 public class AccountAspect {
 
     /**
@@ -35,6 +35,13 @@ public class AccountAspect {
     static {
         // 通过缓存获取用户唯一对应的AES密钥
         userAesKey = SecurityUtils.getUserAesKey();
+    }
+
+    /**
+     * 注解切入点
+     */
+    @Pointcut("@annotation(com.ruoyi.common.annotation.MapperEnhancement)")
+    public void pointcut() {
     }
 
     /**

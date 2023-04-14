@@ -2,7 +2,7 @@
  * @Author: Nicolas·Lemon
  * @Date: 2023-04-07 09:59:42
  * @LastEditors: Nicolas·Lemon
- * @LastEditTime: 2023-04-13 19:25:29
+ * @LastEditTime: 2023-04-14 15:33:21
  * @Description: 柠檬账号大师管理页面
 -->
 <template>
@@ -15,58 +15,34 @@
       v-show="showSearch"
       label-width="68px"
     >
-      <!-- <el-form-item label="父账号id" prop="parentId">
-        <el-input
-          v-model="queryParams.parentId"
-          placeholder="请输入父账号id"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="祖级列表" prop="ancestors">
-        <el-input
-          v-model="queryParams.ancestors"
-          placeholder="请输入祖级列表"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item> -->
-      <el-form-item label="账户名称" prop="accountName">
+      <el-form-item label="账号名称" prop="accountName">
         <el-input
           v-model="queryParams.accountName"
-          placeholder="请输入账户名称"
+          placeholder="请输入账号名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <!-- <el-form-item label="账户密码" prop="accountPassword">
+      <el-form-item label="账号密码" prop="accountPassword">
         <el-input
           v-model="queryParams.accountPassword"
-          placeholder="请输入账户密码"
+          placeholder="请输入账号密码"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="账户key值偏移量iv" prop="accountKeyIv">
-        <el-input
-          v-model="queryParams.accountKeyIv"
-          placeholder="请输入账户key值偏移量iv"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item> -->
-      <el-form-item label="账户说明" prop="accountInfo">
+      <el-form-item label="账号说明" prop="accountInfo">
         <el-input
           v-model="queryParams.accountInfo"
-          placeholder="请输入账户说明"
+          placeholder="请输入账号说明"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="账户域名" prop="accountDomain">
+      <el-form-item label="账号域名" prop="accountDomain">
         <el-input
           v-model="queryParams.accountDomain"
-          placeholder="请输入账户域名"
+          placeholder="请输入账号域名"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -120,10 +96,10 @@
       :default-expand-all="isExpandAll"
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
     >
-      <el-table-column label="账户名称" prop="accountName" />
-      <el-table-column label="账户密码" align="center" prop="accountPassword" />
-      <el-table-column label="账户说明" align="center" prop="accountInfo" />
-      <el-table-column label="账户域名" align="center" prop="accountDomain" />
+      <el-table-column label="账号名称" prop="accountName" />
+      <el-table-column label="账号密码" align="center" prop="accountPassword" />
+      <el-table-column label="账号说明" align="center" prop="accountInfo" />
+      <el-table-column label="账号域名" align="center" prop="accountDomain" />
       <el-table-column
         label="操作"
         align="center"
@@ -184,20 +160,20 @@
             placeholder="请选择父级节点"
           />
         </el-form-item>
-        <el-form-item label="账户名称" prop="accountName">
-          <el-input v-model="form.accountName" placeholder="请输入账户名称" />
+        <el-form-item label="账号名称" prop="accountName">
+          <el-input v-model="form.accountName" placeholder="请输入账号名称" />
         </el-form-item>
-        <el-form-item label="账户密码" prop="accountPassword">
+        <el-form-item label="账号密码" prop="accountPassword">
           <el-input
             v-model="form.accountPassword"
-            placeholder="请输入账户密码"
+            placeholder="请输入账号密码"
           />
         </el-form-item>
-        <el-form-item label="账户说明" prop="accountInfo">
-          <el-input v-model="form.accountInfo" placeholder="请输入账户说明" />
+        <el-form-item label="账号说明" prop="accountInfo">
+          <el-input v-model="form.accountInfo" placeholder="请输入账号说明" />
         </el-form-item>
-        <el-form-item label="账户域名" prop="accountDomain">
-          <el-input v-model="form.accountDomain" placeholder="请输入账户域名" />
+        <el-form-item label="账号域名" prop="accountDomain">
+          <el-input v-model="form.accountDomain" placeholder="请输入账号域名" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -226,7 +202,7 @@ export default {
   },
   data() {
     return {
-      // 行账户密码临时缓存列表
+      // 行账号密码临时缓存列表
       rowPwdList: [],
       // 遮罩层
       loading: true,
@@ -249,10 +225,8 @@ export default {
       // 查询参数
       queryParams: {
         parentId: null,
-        ancestors: null,
         accountName: null,
         accountPassword: null,
-        accountKeyIv: null,
         accountInfo: null,
         accountDomain: null,
       },
@@ -261,7 +235,7 @@ export default {
       // 表单校验
       rules: {
         accountName: [
-          { required: true, message: "账户名称不能为空", trigger: "blur" },
+          { required: true, message: "账号名称不能为空", trigger: "blur" },
         ],
       },
     };
@@ -313,17 +287,10 @@ export default {
       this.form = {
         accountId: null,
         parentId: null,
-        ancestors: null,
         accountName: null,
         accountPassword: null,
-        accountKeyIv: null,
         accountInfo: null,
         accountDomain: null,
-        delFlag: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
       };
       this.resetForm("form");
     },
@@ -409,7 +376,7 @@ export default {
         this.form.parentId = row.accountId;
       }
       getAccount(row.accountId).then((response) => {
-        this.form = response.data;
+        this.form = { ...response.data };
         this.open = true;
         this.title = "修改柠檬账号大师账号";
       });
@@ -417,29 +384,28 @@ export default {
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate((valid) => {
-        if (valid) {
-          if (this.form.accountId != null) {
-            updateAccount(this.form).then((response) => {
-              this.$modal.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
-            });
-          } else {
-            addAccount(this.form).then((response) => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            });
-          }
+        if (!valid) {
+          return;
+        }
+        if (this.form.accountId != null) {
+          updateAccount(this.form).then((response) => {
+            this.$modal.msgSuccess("修改成功");
+            this.open = false;
+            this.getList();
+          });
+        } else {
+          addAccount(this.form).then((response) => {
+            this.$modal.msgSuccess("新增成功");
+            this.open = false;
+            this.getList();
+          });
         }
       });
     },
     /** 删除按钮操作 */
     handleDelete(row) {
       this.$modal
-        .confirm(
-          '是否确认删除柠檬账号大师账号编号为"' + row.accountId + '"的数据项？'
-        )
+        .confirm('是否确认删除账号名称为 "' + row.accountName + '" 的数据项？')
         .then(function () {
           return delAccount(row.accountId);
         })

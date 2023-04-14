@@ -85,11 +85,13 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
      */
     @Override
     public boolean saveOrUpdate(Account entity) {
-        // 先往账户表中插入或更新一条记录
+        // 将自动填充的字段全设为空，因为修改的时候，会携带原始的参数
         entity.setCreateBy(null);
         entity.setCreateTime(null);
         entity.setUpdateBy(null);
         entity.setUpdateTime(null);
+        entity.setDelFlag(null);
+        // 先往账户表中插入或更新一条记录
         boolean isSavedOrUpdated = super.saveOrUpdate(entity);
         // 插入或更新不成功，就返回false
         if (!isSavedOrUpdated) {
@@ -113,6 +115,48 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         // 如果关联表中没有关联的记录就新增该关联项
         user = new UserAccount(userId, accountId);
         return SqlHelper.retBool(userMapper.insert(user));
+    }
+
+    /**
+     * 根据传入的参数搜索相应的账户列表
+     * TODO 逻辑有待实现
+     * FIXME 目前数据库表中是都进行过加密了的，且每条数据加密的偏移量都是不同的，这对这种搜索，就有很大的麻烦
+     *
+     * @param accountName     账号名
+     * @param accountPassword 账户密码
+     * @param accountInfo     账号说明
+     * @param accountDomain   账号域名
+     * @return 结果集
+     */
+    @Override
+    public List<Account> list(String accountName, String accountPassword, String accountInfo, String accountDomain) {
+        // 判断上述条件是否全为空，全为空就查询所有符合条件的记录
+        boolean isParamAllEmpty = StringUtils.isEmpty(accountName) &&
+                StringUtils.isEmpty(accountPassword) &&
+                StringUtils.isEmpty(accountInfo) &&
+                StringUtils.isEmpty(accountDomain);
+        if (isParamAllEmpty) {
+            return super.list();
+        }
+        // 拼接查询条件（这里才是问题所在）
+        QueryWrapper<Account> wrapper = new QueryWrapper<>();
+        if (StringUtils.isNotEmpty(accountName)) {
+            wrapper.eq("account_name", accountName);
+        }
+        // return super.list(wrapper);
+        return super.list();
+    }
+
+    /**
+     * 是否存在账户子节点
+     *
+     * @param accountId 账户ID
+     * @return 结果
+     */
+    @Override
+    public boolean hasChildByAccountId(Long accountId) {
+        int result = super.getBaseMapper().hasChildByAccountId(accountId);
+        return result > 0;
     }
 
 }

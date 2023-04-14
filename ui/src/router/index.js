@@ -2,7 +2,7 @@
  * @Author: Nicolas·Lemon
  * @Date: 2023-04-07 08:53:50
  * @LastEditors: Nicolas·Lemon
- * @LastEditTime: 2023-04-10 22:16:07
+ * @LastEditTime: 2023-04-14 15:47:08
  * @Description: 路由器
  */
 import Vue from 'vue'
@@ -77,7 +77,7 @@ export const constantRoutes = [
         path: 'index',
         component: () => import('@/views/account_master/index'),
         name: 'Index',
-        meta: { title: '首页', icon: 'dashboard', affix: true }
+        meta: { title: '账号管理', icon: 'dashboard', affix: true }
       }
     ]
   },

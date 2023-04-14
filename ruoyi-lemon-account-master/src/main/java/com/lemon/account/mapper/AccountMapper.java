@@ -16,8 +16,13 @@ import java.util.List;
  */
 @Mapper
 public interface AccountMapper extends BaseMapper<Account> {
+
     /**
-     * 通过账户id批量删除账户（delete语句）
+     * 通过账户id批量物理删除账户（delete语句）
      */
     int deleteByIds(@Param("ids") List<Long> accountIds);
+
+    @Select("select count(1) from lam_account where parent_id=#{accountId} limit 1")
+    int hasChildByAccountId(Long accountId);
+
 }
