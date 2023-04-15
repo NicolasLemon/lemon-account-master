@@ -17,8 +17,6 @@ public interface AccountService extends IService<Account> {
 
     /**
      * 根据传入的参数搜索相应的账户列表
-     * TODO 逻辑有待实现
-     * FIXME 目前数据库表中是都进行过加密了的，且每条数据加密的偏移量都是不同的，这对这种搜索，就有很大的麻烦
      *
      * @param accountName   账号名称
      * @param accountInfo   账号说明
@@ -34,5 +32,14 @@ public interface AccountService extends IService<Account> {
      * @return 结果
      */
     boolean hasChildByAccountId(Long accountId);
+
+    /**
+     * 通过用户ID查询所有账户信息
+     *
+     * @param userId 用户ID
+     * @return 结果
+     */
+    @SuppressWarnings("unused")
+    List<Account> listAccountsByUserId(Long userId);
 
 }

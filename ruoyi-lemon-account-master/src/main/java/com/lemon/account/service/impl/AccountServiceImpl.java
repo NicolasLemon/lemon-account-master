@@ -13,10 +13,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -28,12 +30,18 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> implements AccountService {
 
     /**
      * 账户与用户关联表 Mapper
      */
     private final UserAccountMapper userMapper;
+
+    /**
+     * 假密码
+     */
+    private final String fakePwd = "*********";
 
     /**
      * 重写list()方法，拼接内部sql，并屏蔽明文密码
@@ -43,9 +51,6 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
      */
     @Override
     public List<Account> list(Wrapper<Account> queryWrapper) {
-        // 需要将真密码替换成的假密码
-        final String fakePwd = "*********";
-
         // 将Wrapper强制转换成QueryWrapper
         QueryWrapper<Account> wrapper = (QueryWrapper<Account>) queryWrapper;
         // 如果传入的是Wrappers.emptyWrapper()的话，就构造新的QueryWrapper
@@ -56,7 +61,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         // 拼接内部sql
         wrapper.inSql("account_id", "select account_id from lam_user_account where user_id=" + SecurityUtils.getUserId());
         List<Account> accountList = super.list(wrapper);
-        // 处理结果集，将密码改为星号或null
+        // 处理结果集，替换成假密码
         accountList.forEach(a -> a.setAccountPassword(StringUtils.isNotEmpty(a.getAccountPassword()) ? fakePwd : null));
 
         return accountList;
@@ -132,8 +137,6 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
 
     /**
      * 根据传入的参数搜索相应的账户列表
-     * TODO 逻辑有待实现
-     * FIXME 目前数据库表中是都进行过加密了的，且每条数据加密的偏移量都是不同的，这对这种搜索，就有很大的麻烦
      *
      * @param accountName   账号名称
      * @param accountInfo   账号说明
@@ -142,20 +145,68 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
      */
     @Override
     public List<Account> list(String accountName, String accountInfo, String accountDomain) {
-        // 判断上述条件是否全为空，全为空就查询所有符合条件的记录
-        boolean isParamAllEmpty = StringUtils.isEmpty(accountName) &&
-                StringUtils.isEmpty(accountInfo) &&
-                StringUtils.isEmpty(accountDomain);
-        if (isParamAllEmpty) {
-            return super.list();
+        // 查询当前用户所有的账户
+        List<Account> accounts = super.getBaseMapper().selectAccountsByUserId(SecurityUtils.getUserId());
+        // 替换成假密码
+        accounts.forEach(a -> a.setAccountPassword(StringUtils.isNotEmpty(a.getAccountPassword()) ? fakePwd : null));
+
+        /// 在所有账户信息中筛选出符合条件的结果
+        // 筛选条件1：账号名称 + 账号说明 + 账号域名
+        if (StringUtils.isNotEmpty(accountName) && StringUtils.isNotEmpty(accountInfo) && StringUtils.isNotEmpty(accountDomain)) {
+            log.info("触发【账号名称 + 账号说明 + 账号域名】搜索");
+            return accounts.stream()
+                    .filter(u -> u.getAccountName().contains(accountName))
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountInfo()) && u.getAccountInfo().contains(accountInfo))
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountDomain()) && u.getAccountDomain().contains(accountDomain))
+                    .collect(Collectors.toList());
         }
-        // 拼接查询条件（这里才是问题所在）
-        QueryWrapper<Account> wrapper = new QueryWrapper<>();
+        // 筛选条件2：账号名称 + 账号说明
+        if (StringUtils.isNotEmpty(accountName) && StringUtils.isNotEmpty(accountInfo)) {
+            log.info("触发【账号名称 + 账号说明】搜索");
+            return accounts.stream()
+                    .filter(u -> u.getAccountName().contains(accountName))
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountInfo()) && u.getAccountInfo().contains(accountInfo))
+                    .collect(Collectors.toList());
+        }
+        // 筛选条件3：账号名称 + 账号域名
+        if (StringUtils.isNotEmpty(accountName) && StringUtils.isNotEmpty(accountDomain)) {
+            log.info("触发【账号名称 + 账号域名】搜索");
+            return accounts.stream()
+                    .filter(u -> u.getAccountName().contains(accountName))
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountDomain()) && u.getAccountDomain().contains(accountDomain))
+                    .collect(Collectors.toList());
+        }
+        // 筛选条件4：账号说明 + 账号域名
+        if (StringUtils.isNotEmpty(accountInfo) && StringUtils.isNotEmpty(accountDomain)) {
+            log.info("触发【账号说明 + 账号域名】搜索");
+            return accounts.stream()
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountInfo()) && u.getAccountInfo().contains(accountInfo))
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountDomain()) && u.getAccountDomain().contains(accountDomain))
+                    .collect(Collectors.toList());
+        }
+        // 筛选条件5：账号名称
         if (StringUtils.isNotEmpty(accountName)) {
-            wrapper.eq("account_name", accountName);
+            log.info("触发【账号名称】搜索");
+            return accounts.stream()
+                    .filter(u -> u.getAccountName().contains(accountName))
+                    .collect(Collectors.toList());
         }
-        // return super.list(wrapper);
-        return super.list();
+        // 筛选条件6：账号说明
+        if (StringUtils.isNotEmpty(accountInfo)) {
+            log.info("触发【账号说明】搜索");
+            return accounts.stream()
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountInfo()) && u.getAccountInfo().contains(accountInfo))
+                    .collect(Collectors.toList());
+        }
+        // 筛选条件7：账号域名
+        if (StringUtils.isNotEmpty(accountDomain)) {
+            log.info("触发【账号域名】搜索");
+            return accounts.stream()
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountDomain()) && u.getAccountDomain().contains(accountDomain))
+                    .collect(Collectors.toList());
+        }
+
+        return accounts;
     }
 
     /**
@@ -168,6 +219,11 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     public boolean hasChildByAccountId(Long accountId) {
         int result = super.getBaseMapper().hasChildByAccountId(accountId);
         return result > 0;
+    }
+
+    @Override
+    public List<Account> listAccountsByUserId(Long userId) {
+        return super.getBaseMapper().selectAccountsByUserId(userId);
     }
 
 }

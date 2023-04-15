@@ -3,7 +3,7 @@
 <mapper namespace="com.lemon.account.mapper.AccountMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.lemon.account.domain.Account">
+    <resultMap id="AccountResult" type="com.lemon.account.domain.Account">
         <id column="account_id" property="accountId"/>
         <result column="create_by" property="createBy"/>
         <result column="create_time" property="createTime"/>
@@ -20,13 +20,31 @@
     </resultMap>
 
     <!-- 通用查询结果列 -->
-    <sql id="Base_Column_List">
-        create_by,
-        create_time,
-        update_by,
-        update_time,
-        account_id, parent_id, ancestors, account_name, account_password, account_key_iv, account_info, account_domain, del_flag
+    <sql id="selectAccountVO">
+        select account_id,
+               parent_id,
+               ancestors,
+               account_name,
+               account_password,
+               account_key_iv,
+               account_info,
+               account_domain,
+               del_flag,
+               create_by,
+               create_time,
+               update_by,
+               update_time
+        from lam_account as a
     </sql>
+
+    <select id="selectAccountsByUserId" parameterType="long" resultMap="AccountResult">
+        <include refid="selectAccountVO"/>
+        where del_flag = '0'
+        and a.account_id in(
+        select b.account_id from lam_user_account as b
+        where b.user_id=#{userId}
+        )
+    </select>
 
     <delete id="deleteByIds" parameterType="list">
         delete from lam_account where account_id
