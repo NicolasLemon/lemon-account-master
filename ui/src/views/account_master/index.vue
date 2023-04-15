@@ -2,7 +2,7 @@
  * @Author: Nicolas·Lemon
  * @Date: 2023-04-07 09:59:42
  * @LastEditors: Nicolas·Lemon
- * @LastEditTime: 2023-04-14 15:33:21
+ * @LastEditTime: 2023-04-15 11:18:53
  * @Description: 柠檬账号大师管理页面
 -->
 <template>
@@ -19,14 +19,6 @@
         <el-input
           v-model="queryParams.accountName"
           placeholder="请输入账号名称"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="账号密码" prop="accountPassword">
-        <el-input
-          v-model="queryParams.accountPassword"
-          placeholder="请输入账号密码"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -224,9 +216,10 @@ export default {
       refreshTable: true,
       // 查询参数
       queryParams: {
+        pageNum: 1,
+        pageSize: 10,
         parentId: null,
         accountName: null,
-        accountPassword: null,
         accountInfo: null,
         accountDomain: null,
       },
@@ -234,6 +227,9 @@ export default {
       form: {},
       // 表单校验
       rules: {
+        parentId: [
+          { required: true, message: "父级节点不能为空", trigger: "blur" },
+        ],
         accountName: [
           { required: true, message: "账号名称不能为空", trigger: "blur" },
         ],

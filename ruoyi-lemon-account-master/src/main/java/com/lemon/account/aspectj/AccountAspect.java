@@ -6,6 +6,7 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.sign.Base64;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -103,6 +104,9 @@ public class AccountAspect {
      * @param account 账户对象
      */
     private void decodeMessage(Account account) {
+        if (ObjectUtils.isEmpty(account)) {
+            return;
+        }
         // 获取偏移量
         String keyIv = account.getAccountKeyIv();
         // Base64解码偏移量

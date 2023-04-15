@@ -85,12 +85,25 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
      */
     @Override
     public boolean saveOrUpdate(Account entity) {
-        // 将自动填充的字段全设为空，因为修改的时候，会携带原始的参数
+        // 将自动填充的字段全设为空，避免携带原始参数影响
         entity.setCreateBy(null);
         entity.setCreateTime(null);
         entity.setUpdateBy(null);
         entity.setUpdateTime(null);
         entity.setDelFlag(null);
+
+        // 设置祖级节点列表
+        Long parentId = entity.getParentId();
+        if (parentId == 0L) {
+            entity.setAncestors("0");
+        } else {
+            // 查询上家的祖级节点列表并整合当前祖级节点列表
+            Account one = super.getById(parentId);
+            String ancestors = one.getAncestors() + "," + parentId;
+            String sortString = StringUtils.sortString(ancestors, ",");
+            entity.setAncestors(sortString);
+        }
+
         // 先往账户表中插入或更新一条记录
         boolean isSavedOrUpdated = super.saveOrUpdate(entity);
         // 插入或更新不成功，就返回false
@@ -122,17 +135,15 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
      * TODO 逻辑有待实现
      * FIXME 目前数据库表中是都进行过加密了的，且每条数据加密的偏移量都是不同的，这对这种搜索，就有很大的麻烦
      *
-     * @param accountName     账号名
-     * @param accountPassword 账户密码
-     * @param accountInfo     账号说明
-     * @param accountDomain   账号域名
+     * @param accountName   账号名称
+     * @param accountInfo   账号说明
+     * @param accountDomain 账号域名
      * @return 结果集
      */
     @Override
-    public List<Account> list(String accountName, String accountPassword, String accountInfo, String accountDomain) {
+    public List<Account> list(String accountName, String accountInfo, String accountDomain) {
         // 判断上述条件是否全为空，全为空就查询所有符合条件的记录
         boolean isParamAllEmpty = StringUtils.isEmpty(accountName) &&
-                StringUtils.isEmpty(accountPassword) &&
                 StringUtils.isEmpty(accountInfo) &&
                 StringUtils.isEmpty(accountDomain);
         if (isParamAllEmpty) {

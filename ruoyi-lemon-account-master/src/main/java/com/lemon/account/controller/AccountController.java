@@ -43,10 +43,9 @@ public class AccountController extends BaseController {
     public TableDataInfo listAccounts(HttpServletRequest request) {
         startPage();
         String accountName = request.getParameter("accountName");
-        String accountPassword = request.getParameter("accountPassword");
         String accountInfo = request.getParameter("accountInfo");
         String accountDomain = request.getParameter("accountDomain");
-        return getDataTable(accountService.list(accountName, accountPassword, accountInfo, accountDomain));
+        return getDataTable(accountService.list(accountName, accountInfo, accountDomain));
     }
 
     /**

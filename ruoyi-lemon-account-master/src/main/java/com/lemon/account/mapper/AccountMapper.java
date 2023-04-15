@@ -22,7 +22,7 @@ public interface AccountMapper extends BaseMapper<Account> {
      */
     int deleteByIds(@Param("ids") List<Long> accountIds);
 
-    @Select("select count(1) from lam_account where parent_id=#{accountId} limit 1")
+    @Select("select count(1) from lam_account where parent_id=#{accountId} and del_flag='0' limit 1")
     int hasChildByAccountId(Long accountId);
 
 }
