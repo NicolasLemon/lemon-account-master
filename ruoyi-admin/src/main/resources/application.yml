@@ -15,6 +15,13 @@ ruoyi:
   # 验证码类型 math 数组计算 char 字符验证
   captchaType: math
 
+# 柠檬自定义配置项
+lemon:
+  # 初始默认密钥（32个）
+  defaultKey: TRBuX0XCDpcdCYaGnzjY8M#4NA!O2e7r
+  # 初始默认偏移量（16个）
+  defaultKeyIv: DpcdCYaGnz!jYO#e
+
 # 开发环境配置
 server:
   # 服务器的HTTP端口，默认为8080

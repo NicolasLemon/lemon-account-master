@@ -1,10 +1,12 @@
 package com.lemon.account.aspectj;
 
 import com.lemon.account.domain.Account;
+import com.ruoyi.common.config.LemonConfig;
 import com.ruoyi.common.utils.KeyUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.sign.Base64;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.aspectj.lang.JoinPoint;
@@ -26,17 +28,13 @@ import java.util.List;
 @Component
 @Slf4j
 @SuppressWarnings({"rawtypes", "unused"})
+@RequiredArgsConstructor
 public class AccountAspect {
 
     /**
-     * 用户唯一对应的AES密钥
+     * 柠檬配置项
      */
-    private static final String userAesKey;
-
-    static {
-        // 通过缓存获取用户唯一对应的AES密钥
-        userAesKey = SecurityUtils.getUserAesKey();
-    }
+    private final LemonConfig lemonConfig;
 
     /**
      * 注解切入点
@@ -71,6 +69,9 @@ public class AccountAspect {
     public void doBeforeInsertOrUpdateAccount(JoinPoint point) {
         // 打印提示消息
         printMessage(point, "@Before");
+        // 获取用户密钥
+        String userAesKey = KeyUtils.aes256Decode(lemonConfig.getDefaultKey(),
+                lemonConfig.getDefaultKeyIv(), SecurityUtils.getUserAesKey());
         // 获取对应参数
         Object[] pointArgs = point.getArgs();
         for (Object pointArg : pointArgs) {
@@ -107,6 +108,9 @@ public class AccountAspect {
         if (ObjectUtils.isEmpty(account)) {
             return;
         }
+        // 获取用户密钥
+        String userAesKey = KeyUtils.aes256Decode(lemonConfig.getDefaultKey(),
+                lemonConfig.getDefaultKeyIv(), SecurityUtils.getUserAesKey());
         // 获取偏移量
         String keyIv = account.getAccountKeyIv();
         // Base64解码偏移量

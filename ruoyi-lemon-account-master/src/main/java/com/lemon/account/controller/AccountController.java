@@ -6,6 +6,7 @@ import com.lemon.account.domain.Account;
 import com.lemon.account.domain.UserAccount;
 import com.lemon.account.service.impl.AccountServiceImpl;
 import com.lemon.account.service.impl.UserAccountServiceImpl;
+import com.ruoyi.common.config.LemonConfig;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -43,6 +44,11 @@ public class AccountController extends BaseController {
     private final UserAccountServiceImpl userAccountService;
 
     /**
+     * 柠檬配置项
+     */
+    private final LemonConfig lemonConfig;
+
+    /**
      * 分页查询账号列表（含模糊条件查询）
      *
      * @param request 前端传入的查询参数
@@ -50,6 +56,8 @@ public class AccountController extends BaseController {
      */
     @GetMapping("/list")
     public TableDataInfo listAccounts(HttpServletRequest request) {
+
+        String defaultKey = lemonConfig.getDefaultKey();
         // 获取传入的查询参数
         String accountName = request.getParameter("accountName");
         String accountInfo = request.getParameter("accountInfo");

@@ -36,12 +36,11 @@ public class SecurityUtils {
     }
 
     /**
-     * 获取用户AES默认密钥
+     * 获取用户AES默认密钥（当前是没解密的）
      */
     public static String getUserAesKey() {
         try {
-            String userAesKey = getLoginUser().getUser().getUserAesKey();
-            return KeyUtils.aes256Decode(userAesKey);
+            return getLoginUser().getUser().getUserAesKey();
         } catch (Exception e) {
             return null;
         }

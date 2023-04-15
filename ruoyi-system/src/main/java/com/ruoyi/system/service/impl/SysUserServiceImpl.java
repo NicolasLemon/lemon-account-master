@@ -14,6 +14,7 @@ import com.lemon.account.mapper.AccountMapper;
 import com.lemon.account.mapper.AesKeyMapper;
 import com.lemon.account.mapper.UserAccountMapper;
 import com.lemon.account.mapper.UserAesKeyMapper;
+import com.ruoyi.common.config.LemonConfig;
 import com.ruoyi.common.utils.KeyUtils;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -64,6 +65,11 @@ public class SysUserServiceImpl implements ISysUserService {
     private final ISysConfigService configService;
 
     protected final Validator validator;
+
+    /**
+     * 柠檬配置项
+     */
+    private final LemonConfig lemonConfig;
 
     /**
      * 柠檬账号大师 - AES密钥 Mapper
@@ -390,7 +396,8 @@ public class SysUserServiceImpl implements ISysUserService {
         // 密钥表新增一条密钥
         AesKey aesKey = new AesKey();
         // 生成一个32位随机密钥，并加密该密钥
-        String key = KeyUtils.aes256Encode(KeyUtils.generateKey(32));
+        String key = KeyUtils.aes256Encode(lemonConfig.getDefaultKey(),
+                lemonConfig.getDefaultKeyIv(), KeyUtils.generateKey(32));
         aesKey.setAesKey(key);
         aesKeyMapper.insert(aesKey);
 
@@ -460,8 +467,8 @@ public class SysUserServiceImpl implements ISysUserService {
         // 删除用户与岗位表
         userPostMapper.deleteUserPostByUserId(userId);
         // 删除用户与柠檬大师账户相关关联的表
-        Long[] userIds=new Long[1];
-        userIds[0]=userId;
+        Long[] userIds = new Long[1];
+        userIds[0] = userId;
         this.deleteLemonAccountByUserIds(userIds);
         return userMapper.deleteUserById(userId);
     }

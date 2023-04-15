@@ -1,3 +1,10 @@
+<!--
+ * @Author: Nicolas·Lemon
+ * @Date: 2023-04-14 20:39:36
+ * @LastEditors: Nicolas·Lemon
+ * @LastEditTime: 2023-04-15 18:58:34
+ * @Description: 登录页面
+-->
 <template>
   <div class="login">
     <el-form
@@ -95,8 +102,8 @@ export default {
     return {
       codeUrl: "",
       loginForm: {
-        username: "",
-        password: "",
+        username: "admin",
+        password: "admin123",
         rememberMe: false,
         code: "",
         uuid: "",

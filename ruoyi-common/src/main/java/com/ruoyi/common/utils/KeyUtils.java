@@ -24,41 +24,12 @@ public class KeyUtils {
     private static final String AES = "AES";
 
     /**
-     * 默认密钥（32个字节）
-     */
-    private static final String DEFAULT_KEY = "TRBuX0XCDpcdCYaGnzjY8M#4NA!O2e7r";
-
-    /**
-     * 默认偏移量（16个字节）
-     */
-    private static final String DEFAULT_KEY_IV = "DpcdCYaGnz!jYO#e";
-
-    /**
      * 加密解密算法/加密模式/填充方式
      */
     private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS5Padding";
 
     static {
         java.security.Security.setProperty("crypto.policy", "unlimited");
-    }
-
-
-    /**
-     * AES256加密（默认密钥和偏移量）
-     *
-     * @param content 加密内容
-     */
-    public static String aes256Encode(String content) {
-        return aes256Encode(null, null, content);
-    }
-
-    /**
-     * AES256解密（默认密钥和偏移量）
-     *
-     * @param content 解密内容
-     */
-    public static String aes256Decode(String content) {
-        return aes256Decode(null, null, content);
     }
 
     /**
@@ -73,9 +44,6 @@ public class KeyUtils {
         if (StringUtils.isEmpty(content)) {
             return content;
         }
-        // 若key和keyIv是空的话，就使用默认的key和keyIv
-        key = StringUtils.isEmpty(key) ? DEFAULT_KEY : key;
-        keyIv = StringUtils.isEmpty(keyIv) ? DEFAULT_KEY_IV : keyIv;
 
         try {
             SecretKey secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), AES);
@@ -107,9 +75,6 @@ public class KeyUtils {
         if (StringUtils.isEmpty(content)) {
             return content;
         }
-        // 若key和keyIv是空的话，就使用默认的key和keyIv
-        key = StringUtils.isEmpty(key) ? DEFAULT_KEY : key;
-        keyIv = StringUtils.isEmpty(keyIv) ? DEFAULT_KEY_IV : keyIv;
 
         try {
             SecretKey secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), AES);

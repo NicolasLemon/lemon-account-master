@@ -41,7 +41,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     /**
      * 假密码
      */
-    private final String fakePwd = "*********";
+    private final String fakePwd = "******************";
 
     /**
      * 重写list()方法，拼接内部sql，并屏蔽明文密码

@@ -1,6 +1,5 @@
 package com.lemon.account;
 
-import com.ruoyi.common.utils.KeyUtils;
 import org.junit.Test;
 
 /**
@@ -10,6 +9,5 @@ import org.junit.Test;
 public class MyTest {
     @Test
     public void myTest() {
-        System.out.println("a：" + KeyUtils.aes256Encode("TRBuX0XCDpcdCYaGnzjY8M#4NA!O2e7r"));
     }
 }
