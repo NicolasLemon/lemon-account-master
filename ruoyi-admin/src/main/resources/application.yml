@@ -8,8 +8,8 @@ ruoyi:
   copyrightYear: 2023
   # 实例演示开关
   demoEnabled: true
-  # 文件路径 示例（ Windows配置D:/ruoyi/uploadPath，Linux配置 /home/ruoyi/uploadPath）
-  profile: D:/ruoyi/uploadPath
+  # 文件路径 示例（ Windows配置D:/lemon/uploadPath，Linux配置 /home/lemon/uploadPath）
+  profile: D:/lemon/uploadPath
   # 获取ip地址开关
   addressEnabled: false
   # 验证码类型 math 数组计算 char 字符验证
@@ -44,6 +44,7 @@ server:
 logging:
   level:
     com.ruoyi: debug
+    com.lemon: debug
     org.springframework: warn
 
 # 用户配置
@@ -124,8 +125,8 @@ mybatis-plus:
   mapper-locations: classpath*:mapper/**/*Mapper.xml
   configuration:
     # 指定 MyBatis 所用日志的具体实现
-    # log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+    # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     # 使用驼峰命名法转换字段
     map-underscore-to-camel-case: true
     # 使全局的映射器启用或禁用缓存
@@ -134,15 +135,6 @@ mybatis-plus:
     use-generated-keys: true
   # 配置默认的执行器.SIMPLE就是普通执行器;REUSE执行器会重用预处理语句(prepared statements);BATCH执行器将重用语句并执行批量更新
   executor-type: simple
-
-# MyBatis配置
-#mybatis:
-#  # 搜索指定包别名
-#  typeAliasesPackage: com.ruoyi.**.domain
-#  # 配置mapper的扫描，找到所有的mapper.xml映射文件
-#  mapperLocations: classpath*:mapper/**/*Mapper.xml
-#  # 加载全局的配置文件
-#  configLocation: classpath:mybatis/mybatis-config.xml
 
 # PageHelper分页插件
 pagehelper:

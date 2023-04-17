@@ -2,7 +2,7 @@
  * @Author: Nicolas·Lemon
  * @Date: 2023-04-14 20:39:36
  * @LastEditors: Nicolas·Lemon
- * @LastEditTime: 2023-04-15 18:58:34
+ * @LastEditTime: 2023-04-17 13:44:19
  * @Description: 登录页面
 -->
 <template>
@@ -102,8 +102,8 @@ export default {
     return {
       codeUrl: "",
       loginForm: {
-        username: "admin",
-        password: "admin123",
+        username: "",
+        password: "",
         rememberMe: false,
         code: "",
         uuid: "",

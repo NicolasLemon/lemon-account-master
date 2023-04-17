@@ -73,6 +73,9 @@
 
     <!-- 系统模块日志级别控制  -->
     <logger name="com.ruoyi" level="info"/>
+    <logger name="com.lemon" level="info"/>
+    <!-- MyBatis SQL -->
+    <logger name="com.lemon.account.mapper" level="debug"/>
     <!-- Spring日志级别控制  -->
     <logger name="org.springframework" level="warn"/>
 
