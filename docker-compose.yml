@@ -1,0 +1,109 @@
+version: '3'
+
+services:
+  lam:
+    image: lam-master:latest
+    container_name: lam-master
+    # 网络
+    networks:
+      - localnet
+    # 端口映射
+    ports:
+      - 8080:8080
+    # 外部挂载
+    volumes:
+      # 日志
+      - D:/Daturm/LemonAccountMaster/logs:/logs
+    # 健康检查
+    healthcheck:
+      # http://localhost:8080/heart/ 为容器指定的健康检查接口
+      test: ["CMD", "curl", "-f", "http://localhost:8080/heart/"]
+      # 健康检查的间隔，默认为 30 秒，单位(h/m/s)；
+      interval: 30s 
+      # 健康检查命令运行超时时间，如果超过这个时间，本次健康检查就被视为失败，单位(h/m/s)；
+      timeout: 20s
+      # 当连续失败指定次数后，则将容器状态视为 unhealthy。
+      retries: 5
+    # 启动依赖于
+    depends_on:
+      - mysql
+      - redis
+      
+  mysql:
+    image: mysql:8.0
+    container_name: lam-mysql
+    networks:
+      - localnet
+    # 环境配置
+    environment:
+      # 默认ROOT密码
+      MYSQL_ROOT_PASSWORD: root
+      # 设置时区
+      TZ: Asia/Shanghai
+      default-time_zone: +8:00
+    # 端口映射
+    ports:
+      - 3306:3306
+    # 外部挂载
+    volumes:
+      # 配置
+      - D:/Daturm/DockerVolume/mysql/conf:/etc/mysql/conf.d
+      # 数据
+      - D:/Daturm/DockerVolume/mysql/data:/var/lib/mysql
+      # 日志
+      - D:/Daturm/DockerVolume/mysql/log:/var/log/mysql
+    # 解决外部无法访问
+    command: --default-authentication-plugin=mysql_native_password
+
+  redis:
+    # 镜像名称
+    image: redis:latest
+    # 容器名称
+    container_name: lam-redis
+    # 网络
+    networks:
+      - localnet
+    # 端口映射
+    ports:
+      - 6379:6379
+    # 外部挂载
+    volumes:
+      # 配置
+      - D:/Daturm/DockerVolume/redis/redis.conf:/etc/redis.conf:ro
+      # 数据
+      - D:/Daturm/DockerVolume/redis/data:/data
+    # 加载配置项
+    command: redis-server /etc/redis.conf
+
+  nginx:
+    # 镜像名称
+    image: nginx:latest
+    # 容器名称
+    container_name: lam-nginx
+    # 网络
+    networks:
+      - localnet
+    # 端口映射
+    ports:
+      # 这里是映射原本的80端口
+      - 9090:80
+      # 映射自定义端口
+      - 3008:3008
+    # 外部挂载
+    volumes:
+      # 首页
+      - D:/Daturm/DockerVolume/nginx/html:/usr/share/nginx/html
+      # 配置
+      - D:/Daturm/DockerVolume/nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+      - D:/Daturm/DockerVolume/nginx/conf/conf.d:/etc/nginx/conf.d
+      # 日志
+      - D:/Daturm/DockerVolume/nginx/logs:/var/log/nginx
+    depends_on:
+      lam:
+        condition: service_healthy
+
+# 网络配置
+networks:
+  # 链接到本地的localnet中
+  localnet:
+    external: true
