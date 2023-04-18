@@ -2,7 +2,7 @@
  * @Author: Nicolas·Lemon
  * @Date: 2023-04-07 09:59:42
  * @LastEditors: Nicolas·Lemon
- * @LastEditTime: 2023-04-15 11:18:53
+ * @LastEditTime: 2023-04-18 20:09:52
  * @Description: 柠檬账号大师管理页面
 -->
 <template>
@@ -15,18 +15,18 @@
       v-show="showSearch"
       label-width="68px"
     >
-      <el-form-item label="账号名称" prop="accountName">
-        <el-input
-          v-model="queryParams.accountName"
-          placeholder="请输入账号名称"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="账号说明" prop="accountInfo">
         <el-input
           v-model="queryParams.accountInfo"
           placeholder="请输入账号说明"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="用户名" prop="accountName">
+        <el-input
+          v-model="queryParams.accountName"
+          placeholder="请输入用户名"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -88,9 +88,9 @@
       :default-expand-all="isExpandAll"
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
     >
-      <el-table-column label="账号名称" prop="accountName" />
-      <el-table-column label="账号密码" align="center" prop="accountPassword" />
-      <el-table-column label="账号说明" align="center" prop="accountInfo" />
+      <el-table-column label="账号说明" prop="accountInfo" />
+      <el-table-column label="用户名" align="center" prop="accountName" />
+      <el-table-column label="密码" align="center" prop="accountPassword" />
       <el-table-column label="账号域名" align="center" prop="accountDomain" />
       <el-table-column
         label="操作"
@@ -103,8 +103,10 @@
               size="mini"
               type="text"
               icon="el-icon-view"
-              v-if="scope.row.accountPassword != null"
-              content="aaa"
+              v-if="
+                scope.row.accountName !== null ||
+                scope.row.accountPassword !== null
+              "
               @click="handlePwdView(scope.row)"
             ></el-button>
           </el-tooltip>
@@ -152,17 +154,17 @@
             placeholder="请选择父级节点"
           />
         </el-form-item>
-        <el-form-item label="账号名称" prop="accountName">
-          <el-input v-model="form.accountName" placeholder="请输入账号名称" />
+        <el-form-item label="账号说明" prop="accountInfo">
+          <el-input v-model="form.accountInfo" placeholder="请输入账号说明" />
         </el-form-item>
-        <el-form-item label="账号密码" prop="accountPassword">
+        <el-form-item label="用 户 名" prop="accountName">
+          <el-input v-model="form.accountName" placeholder="请输入用户名" />
+        </el-form-item>
+        <el-form-item label="密　　码" prop="accountPassword">
           <el-input
             v-model="form.accountPassword"
             placeholder="请输入账号密码"
           />
-        </el-form-item>
-        <el-form-item label="账号说明" prop="accountInfo">
-          <el-input v-model="form.accountInfo" placeholder="请输入账号说明" />
         </el-form-item>
         <el-form-item label="账号域名" prop="accountDomain">
           <el-input v-model="form.accountDomain" placeholder="请输入账号域名" />
@@ -230,8 +232,8 @@ export default {
         parentId: [
           { required: true, message: "父级节点不能为空", trigger: "blur" },
         ],
-        accountName: [
-          { required: true, message: "账号名称不能为空", trigger: "blur" },
+        accountInfo: [
+          { required: true, message: "账号说明不能为空", trigger: "blur" },
         ],
       },
     };
@@ -260,7 +262,7 @@ export default {
       }
       return {
         id: node.accountId,
-        label: node.accountName,
+        label: node.accountInfo,
         children: node.children,
       };
     },
@@ -268,7 +270,7 @@ export default {
     getTreeselect() {
       listAccount().then((response) => {
         this.accountOptions = [];
-        const data = { accountId: 0, accountName: "顶级节点", children: [] };
+        const data = { accountId: 0, accountInfo: "顶级节点", children: [] };
         data.children = this.handleTree(response.rows, "accountId", "parentId");
         this.accountOptions.push(data);
       });
@@ -321,47 +323,85 @@ export default {
     },
     /** 显示/隐藏密码 */
     handlePwdView(row) {
-      let pwd = row.accountPassword;
-      // 密码为空就不处理
-      if (pwd === null) {
+      // 当前行的用户名和密码
+      let currents = {
+        name: row.accountName,
+        pwd: row.accountPassword,
+      };
+
+      // 为空就不处理
+      if (currents.name === null && currents.pwd === null) {
         return;
       }
+
       // 假密码，真密码
-      let fakePwd = null;
-      let realPWd = null;
+      let fakes = { name: null, pwd: null };
+      let reals = { name: null, pwd: null };
+
       // 判断在rowPwdList是否存在当前行的数据
       for (let key in this.rowPwdList) {
         let item = this.rowPwdList[key];
         if (item.id === row.accountId) {
-          fakePwd = item.fakePwd;
-          realPWd = item.realPwd;
+          fakes = item.fakes;
+          reals = item.reals;
           break;
         }
       }
 
-      // 显示真密码
-      if (fakePwd != null && pwd != fakePwd) {
-        row.accountPassword = fakePwd;
+      // 隐藏真密码
+      if (
+        fakes.name !== null &&
+        fakes.name !== currents.name &&
+        fakes.pwd !== null &&
+        fakes.pwd !== currents.pwd
+      ) {
+        row.accountName = fakes.name;
+        row.accountPassword = fakes.pwd;
+        return;
+      }
+      if (fakes.name !== null && fakes.name !== currents.name) {
+        row.accountName = fakes.name;
+        return;
+      }
+      if (fakes.pwd !== null && fakes.pwd !== currents.pwd) {
+        row.accountPassword = fakes.pwd;
         return;
       }
 
-      // 隐藏真密码
-      if (realPWd != null && pwd != realPWd) {
-        row.accountPassword = realPWd;
+      // 显示真密码
+      if (
+        reals.name !== null &&
+        reals.name !== currents.name &&
+        reals.pwd !== null &&
+        reals.pwd !== currents.pwd
+      ) {
+        row.accountName = reals.name;
+        row.accountPassword = reals.pwd;
+      }
+      if (reals.name !== null && reals.name !== currents.name) {
+        row.accountName = reals.name;
+        return;
+      }
+      if (reals.pwd !== null && reals.pwd !== currents.pwd) {
+        row.accountPassword = reals.pwd;
         return;
       }
 
       // 第一次点击的时候就调用接口，反之就利用缓存显隐密码
       getAccount(row.accountId).then((response) => {
-        realPWd = response.data.accountPassword;
+        reals = {
+          name: response.data.accountName,
+          pwd: response.data.accountPassword,
+        };
         // 将当前行的数据插入到临时缓存列表中去
         this.rowPwdList.push({
           id: row.accountId,
-          fakePwd: pwd,
-          realPwd: realPWd,
+          fakes: { name: currents.name, pwd: currents.pwd },
+          reals: reals,
         });
         // 显示真密码
-        row.accountPassword = realPWd;
+        row.accountName = reals.name;
+        row.accountPassword = reals.pwd;
       });
     },
     /** 修改按钮操作 */
@@ -386,6 +426,7 @@ export default {
         if (this.form.accountId != null) {
           updateAccount(this.form).then((response) => {
             this.$modal.msgSuccess("修改成功");
+            this.removeObjFromRowPwdList(this.form.accountId);
             this.open = false;
             this.getList();
           });
@@ -401,15 +442,23 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       this.$modal
-        .confirm('是否确认删除账号名称为 "' + row.accountName + '" 的数据项？')
+        .confirm('是否确认删除为 "' + row.accountInfo + '" 的数据项？')
         .then(function () {
           return delAccount(row.accountId);
         })
         .then(() => {
           this.getList();
           this.$modal.msgSuccess("删除成功");
+          this.removeObjFromRowPwdList(row.accountId);
         })
         .catch(() => {});
+    },
+    // 移除相关账号id的临时缓存
+    removeObjFromRowPwdList(accountId) {
+      const idx = this.rowPwdList.findIndex((m) => m.id == accountId);
+      if (idx >= 0) {
+        this.rowPwdList.splice(idx, 1);
+      }
     },
   },
 };

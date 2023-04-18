@@ -37,27 +37,27 @@ public class Account extends BaseEntity {
     private String ancestors;
 
     /**
-     * 账户名称
-     */
-    private String accountName;
-
-    /**
-     * 账户密码
-     */
-    private String accountPassword;
-
-    /**
-     * 账户key值偏移量iv
-     */
-    private String accountKeyIv;
-
-    /**
      * 账户说明
      */
     private String accountInfo;
 
     /**
-     * 账户域名
+     * 用户名
+     */
+    private String accountName;
+
+    /**
+     * 密码
+     */
+    private String accountPassword;
+
+    /**
+     * key值偏移量iv
+     */
+    private String accountKeyIv;
+
+    /**
+     * 账号域名
      */
     private String accountDomain;
 

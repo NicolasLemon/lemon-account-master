@@ -61,10 +61,27 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         // 拼接内部sql
         wrapper.inSql("account_id", "select account_id from lam_user_account where user_id=" + SecurityUtils.getUserId());
         List<Account> accountList = super.list(wrapper);
-        // 处理结果集，替换成假密码
-        accountList.forEach(a -> a.setAccountPassword(StringUtils.isNotEmpty(a.getAccountPassword()) ? fakePwd : null));
+        // 处理结果集，不显示真用户名和真密码
+        fakeAccountList(accountList);
 
         return accountList;
+    }
+
+    /**
+     * 处理结果集，不显示真用户名和真密码
+     *
+     * @param accountList 账号列表
+     */
+    private void fakeAccountList(List<Account> accountList) {
+        accountList.forEach(a -> {
+            a.setAccountPassword(StringUtils.isNotEmpty(a.getAccountPassword()) ? fakePwd : null);
+            String name = a.getAccountName();
+            if (StringUtils.isNotEmpty(name)) {
+                a.setAccountName(name.charAt(0) + fakePwd.substring(0, 3) + name.charAt(name.length() - 1));
+            } else {
+                a.setAccountName(null);
+            }
+        });
     }
 
     /**
@@ -147,65 +164,77 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     public List<Account> list(String accountName, String accountInfo, String accountDomain) {
         // 查询当前用户所有的账户
         List<Account> accounts = super.getBaseMapper().selectAccountsByUserId(SecurityUtils.getUserId());
-        // 替换成假密码
-        accounts.forEach(a -> a.setAccountPassword(StringUtils.isNotEmpty(a.getAccountPassword()) ? fakePwd : null));
 
         /// 在所有账户信息中筛选出符合条件的结果
         // 筛选条件1：账号名称 + 账号说明 + 账号域名
         if (StringUtils.isNotEmpty(accountName) && StringUtils.isNotEmpty(accountInfo) && StringUtils.isNotEmpty(accountDomain)) {
             log.info("触发【账号名称 + 账号说明 + 账号域名】搜索");
-            return accounts.stream()
-                    .filter(u -> u.getAccountName().contains(accountName))
+            accounts = accounts.stream()
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountName()) && u.getAccountName().contains(accountName))
                     .filter(u -> StringUtils.isNotEmpty(u.getAccountInfo()) && u.getAccountInfo().contains(accountInfo))
                     .filter(u -> StringUtils.isNotEmpty(u.getAccountDomain()) && u.getAccountDomain().contains(accountDomain))
                     .collect(Collectors.toList());
+            fakeAccountList(accounts);
+            return accounts;
         }
         // 筛选条件2：账号名称 + 账号说明
         if (StringUtils.isNotEmpty(accountName) && StringUtils.isNotEmpty(accountInfo)) {
             log.info("触发【账号名称 + 账号说明】搜索");
-            return accounts.stream()
-                    .filter(u -> u.getAccountName().contains(accountName))
+            accounts = accounts.stream()
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountName()) && u.getAccountName().contains(accountName))
                     .filter(u -> StringUtils.isNotEmpty(u.getAccountInfo()) && u.getAccountInfo().contains(accountInfo))
                     .collect(Collectors.toList());
+            fakeAccountList(accounts);
+            return accounts;
         }
         // 筛选条件3：账号名称 + 账号域名
         if (StringUtils.isNotEmpty(accountName) && StringUtils.isNotEmpty(accountDomain)) {
             log.info("触发【账号名称 + 账号域名】搜索");
-            return accounts.stream()
-                    .filter(u -> u.getAccountName().contains(accountName))
+            accounts = accounts.stream()
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountName()) && u.getAccountName().contains(accountName))
                     .filter(u -> StringUtils.isNotEmpty(u.getAccountDomain()) && u.getAccountDomain().contains(accountDomain))
                     .collect(Collectors.toList());
+            fakeAccountList(accounts);
+            return accounts;
         }
         // 筛选条件4：账号说明 + 账号域名
         if (StringUtils.isNotEmpty(accountInfo) && StringUtils.isNotEmpty(accountDomain)) {
             log.info("触发【账号说明 + 账号域名】搜索");
-            return accounts.stream()
+            accounts = accounts.stream()
                     .filter(u -> StringUtils.isNotEmpty(u.getAccountInfo()) && u.getAccountInfo().contains(accountInfo))
                     .filter(u -> StringUtils.isNotEmpty(u.getAccountDomain()) && u.getAccountDomain().contains(accountDomain))
                     .collect(Collectors.toList());
+            fakeAccountList(accounts);
+            return accounts;
         }
         // 筛选条件5：账号名称
         if (StringUtils.isNotEmpty(accountName)) {
             log.info("触发【账号名称】搜索");
-            return accounts.stream()
-                    .filter(u -> u.getAccountName().contains(accountName))
+            accounts = accounts.stream()
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountName()) && u.getAccountName().contains(accountName))
                     .collect(Collectors.toList());
+            fakeAccountList(accounts);
+            return accounts;
         }
         // 筛选条件6：账号说明
         if (StringUtils.isNotEmpty(accountInfo)) {
             log.info("触发【账号说明】搜索");
-            return accounts.stream()
+            accounts = accounts.stream()
                     .filter(u -> StringUtils.isNotEmpty(u.getAccountInfo()) && u.getAccountInfo().contains(accountInfo))
                     .collect(Collectors.toList());
+            fakeAccountList(accounts);
+            return accounts;
         }
         // 筛选条件7：账号域名
         if (StringUtils.isNotEmpty(accountDomain)) {
             log.info("触发【账号域名】搜索");
-            return accounts.stream()
+            accounts = accounts.stream()
                     .filter(u -> StringUtils.isNotEmpty(u.getAccountDomain()) && u.getAccountDomain().contains(accountDomain))
                     .collect(Collectors.toList());
+            fakeAccountList(accounts);
+            return accounts;
         }
-
+        fakeAccountList(accounts);
         return accounts;
     }
 
