@@ -13,7 +13,7 @@ services:
     # 外部挂载
     volumes:
       # 日志
-      - D:/Daturm/LemonAccountMaster/logs:/logs
+      - ${LAM_PATH}/logs:/logs
     # 健康检查
     healthcheck:
       # http://localhost:8080/heart/ 为容器指定的健康检查接口
@@ -47,11 +47,11 @@ services:
     # 外部挂载
     volumes:
       # 配置
-      - D:/Daturm/DockerVolume/mysql/conf:/etc/mysql/conf.d
+      - ${DOCKER_VOLUME_PATH}/mysql/conf:/etc/mysql/conf.d
       # 数据
-      - D:/Daturm/DockerVolume/mysql/data:/var/lib/mysql
+      - ${DOCKER_VOLUME_PATH}/mysql/data:/var/lib/mysql
       # 日志
-      - D:/Daturm/DockerVolume/mysql/log:/var/log/mysql
+      - ${DOCKER_VOLUME_PATH}/mysql/log:/var/log/mysql
     # 解决外部无法访问
     command: --default-authentication-plugin=mysql_native_password
 
@@ -69,9 +69,9 @@ services:
     # 外部挂载
     volumes:
       # 配置
-      - D:/Daturm/DockerVolume/redis/redis.conf:/etc/redis.conf:ro
+      - ${DOCKER_VOLUME_PATH}/redis/redis.conf:/etc/redis.conf:ro
       # 数据
-      - D:/Daturm/DockerVolume/redis/data:/data
+      - ${DOCKER_VOLUME_PATH}/redis/data:/data
     # 加载配置项
     command: redis-server /etc/redis.conf
 
@@ -85,19 +85,17 @@ services:
       - localnet
     # 端口映射
     ports:
-      # 这里是映射原本的80端口
-      - 9090:80
       # 映射自定义端口
       - 3008:3008
     # 外部挂载
     volumes:
       # 首页
-      - D:/Daturm/DockerVolume/nginx/html:/usr/share/nginx/html
+      - ${DOCKER_VOLUME_PATH}/nginx/html:/usr/share/nginx/html
       # 配置
-      - D:/Daturm/DockerVolume/nginx/conf/nginx.conf:/etc/nginx/nginx.conf
-      - D:/Daturm/DockerVolume/nginx/conf/conf.d:/etc/nginx/conf.d
+      - ${DOCKER_VOLUME_PATH}/nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+      - ${DOCKER_VOLUME_PATH}/nginx/conf/conf.d:/etc/nginx/conf.d
       # 日志
-      - D:/Daturm/DockerVolume/nginx/logs:/var/log/nginx
+      - ${DOCKER_VOLUME_PATH}/nginx/logs:/var/log/nginx
     depends_on:
       lam:
         condition: service_healthy

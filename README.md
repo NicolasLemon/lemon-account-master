@@ -2,7 +2,11 @@
 
 # 介绍
 
-基于RuoYi3.8.5 + MyBatis-Plus3.5.1开发的账户管理系统，一站式管理个人名下的所有的账户密码，数据做到层层加密，哪怕数据库被撞开，也无法破译里面的信息，安全性极高。
+基于RuoYi3.8.5 + MyBatis-Plus3.5.1开发的账户管理系统，
+
+一站式管理个人名下的所有的账户密码，数据做到层层加密，
+
+哪怕数据库被撞开，也无法破译里面的信息，安全性极高。
 
 # 快速了解
 
@@ -73,7 +77,7 @@ Docker不同的容器间会存在网络不能互通的问题，因此，需要�
 
 前端项目打包很简单，参考若依官方文档即可
 
-```shell
+```sh
 npm run build:prod
 ```
 
@@ -107,9 +111,9 @@ npm run build:prod
 
 ##### 创建docker镜像
 
-将上面打包好的`ruoyi-admin.jar`和项目中的`Dockerfile`放在同一目录下
+将上面打包好的`ruoyi-admin.jar`和项目中的`DOCKERFILE`放在同一目录下
 
-```shell
+```sh
 docker build -t lam-master .
 ```
 
@@ -121,7 +125,7 @@ docker build -t lam-master .
 
 在Docker中创建共用网桥
 
-```shell
+```sh
 # 创建本地桥接网络
 docker network create localnet
 # 查看本地网络
@@ -132,13 +136,13 @@ docker network ls
 
 #### Docker-Compose
 
-这里假设基础环境（Nginx+MySQL+Redis）的外部挂载配置都已经设置好了，若没有设置好的，可以先参看：[NicolasLemon/awesome-notes · GitHub](https://github.com/NicolasLemon/awesome-notes/blob/master/Docker/Docker-Notes.md)
+这里假设基础环境（Nginx+MySQL+Redis）的外部挂载配置都已经设置好了，若没有设置好的，可以先参看：[NicolasLemon/awesome-notes · GitHub](https://github.com/NicolasLemon/awesome-notes/blob/master/Docker/README.md)
 
 接下来就可以利用项目中的`docker-compose.yml`文件来一键启动了
 
-（docker-compose.yml文件中需要将外部挂载的目录改成自己的外部的链接哦）
+（docker-compose 环境配置在`.env`文件中哦）
 
-```shell
+```sh
 docker-compose up -d
 ```
 
@@ -150,119 +154,126 @@ docker-compose up -d
 
 ![](README.assets/2023-04-18-21-21-37-image.png)
 
-**docker-compose.yml**
+* `docker-compose.yml`
+  
+  ```yaml
+  version: '3'
+  
+  services:
+    lam:
+      image: lam-master:latest
+      container_name: lam-master
+      # 网络
+      networks:
+        - localnet
+      # 端口映射
+      ports:
+        - 8080:8080
+      # 外部挂载
+      volumes:
+        # 日志
+        - ${LAM_PATH}/logs:/logs
+      # 健康检查
+      healthcheck:
+        # http://localhost:8080/heart/ 为容器指定的健康检查接口
+        test: ["CMD", "curl", "-f", "http://localhost:8080/heart/"]
+        # 健康检查的间隔，默认为 30 秒，单位(h/m/s)；
+        interval: 30s 
+        # 健康检查命令运行超时时间，如果超过这个时间，本次健康检查就被视为失败，单位(h/m/s)；
+        timeout: 20s
+        # 当连续失败指定次数后，则将容器状态视为 unhealthy。
+        retries: 5
+      # 启动依赖于
+      depends_on:
+        - mysql
+        - redis
+  
+    mysql:
+      image: mysql:8.0
+      container_name: lam-mysql
+      networks:
+        - localnet
+      # 环境配置
+      environment:
+        # 默认ROOT密码
+        MYSQL_ROOT_PASSWORD: root
+        # 设置时区
+        TZ: Asia/Shanghai
+        default-time_zone: +8:00
+      # 端口映射
+      ports:
+        - 3306:3306
+      # 外部挂载
+      volumes:
+        # 配置
+        - ${DOCKER_VOLUME_PATH}/mysql/conf:/etc/mysql/conf.d
+        # 数据
+        - ${DOCKER_VOLUME_PATH}/mysql/data:/var/lib/mysql
+        # 日志
+        - ${DOCKER_VOLUME_PATH}/mysql/log:/var/log/mysql
+      # 解决外部无法访问
+      command: --default-authentication-plugin=mysql_native_password
+  
+    redis:
+      # 镜像名称
+      image: redis:latest
+      # 容器名称
+      container_name: lam-redis
+      # 网络
+      networks:
+        - localnet
+      # 端口映射
+      ports:
+        - 6379:6379
+      # 外部挂载
+      volumes:
+        # 配置
+        - ${DOCKER_VOLUME_PATH}/redis/redis.conf:/etc/redis.conf:ro
+        # 数据
+        - ${DOCKER_VOLUME_PATH}/redis/data:/data
+      # 加载配置项
+      command: redis-server /etc/redis.conf
+  
+    nginx:
+      # 镜像名称
+      image: nginx:latest
+      # 容器名称
+      container_name: lam-nginx
+      # 网络
+      networks:
+        - localnet
+      # 端口映射
+      ports:
+        # 映射自定义端口
+        - 3008:3008
+      # 外部挂载
+      volumes:
+        # 首页
+        - ${DOCKER_VOLUME_PATH}/nginx/html:/usr/share/nginx/html
+        # 配置
+        - ${DOCKER_VOLUME_PATH}/nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+        - ${DOCKER_VOLUME_PATH}/nginx/conf/conf.d:/etc/nginx/conf.d
+        # 日志
+        - ${DOCKER_VOLUME_PATH}/nginx/logs:/var/log/nginx
+      depends_on:
+        lam:
+          condition: service_healthy
+  
+  # 网络配置
+  networks:
+    # 链接到本地的localnet中
+    localnet:
+      external: true
+  ```
 
-```yaml
-version: '3'
-
-services:
-  lam:
-    image: lam-master:latest
-    container_name: lam-master
-    # 网络
-    networks:
-      - localnet
-    # 端口映射
-    ports:
-      - 8080:8080
-    # 外部挂载
-    volumes:
-      # 日志
-      - D:/Daturm/LemonAccountMaster/logs:/logs
-    # 健康检查
-    healthcheck:
-      # http://localhost:8080/heart/ 为容器指定的健康检查接口
-      test: ["CMD", "curl", "-f", "http://localhost:8080/heart/"]
-      # 健康检查的间隔，默认为 30 秒，单位(h/m/s)；
-      interval: 30s 
-      # 健康检查命令运行超时时间，如果超过这个时间，本次健康检查就被视为失败，单位(h/m/s)；
-      timeout: 20s
-      # 当连续失败指定次数后，则将容器状态视为 unhealthy。
-      retries: 5
-    # 启动依赖于
-    depends_on:
-      - mysql
-      - redis
-
-  mysql:
-    image: mysql:8.0
-    container_name: lam-mysql
-    networks:
-      - localnet
-    # 环境配置
-    environment:
-      # 默认ROOT密码
-      MYSQL_ROOT_PASSWORD: root
-      # 设置时区
-      TZ: Asia/Shanghai
-      default-time_zone: +8:00
-    # 端口映射
-    ports:
-      - 3306:3306
-    # 外部挂载
-    volumes:
-      # 配置
-      - D:/Daturm/DockerVolume/mysql/conf:/etc/mysql/conf.d
-      # 数据
-      - D:/Daturm/DockerVolume/mysql/data:/var/lib/mysql
-      # 日志
-      - D:/Daturm/DockerVolume/mysql/log:/var/log/mysql
-    # 解决外部无法访问
-    command: --default-authentication-plugin=mysql_native_password
-
-  redis:
-    # 镜像名称
-    image: redis:latest
-    # 容器名称
-    container_name: lam-redis
-    # 网络
-    networks:
-      - localnet
-    # 端口映射
-    ports:
-      - 6379:6379
-    # 外部挂载
-    volumes:
-      # 配置
-      - D:/Daturm/DockerVolume/redis/redis.conf:/etc/redis.conf:ro
-      # 数据
-      - D:/Daturm/DockerVolume/redis/data:/data
-    # 加载配置项
-    command: redis-server /etc/redis.conf
-
-  nginx:
-    # 镜像名称
-    image: nginx:latest
-    # 容器名称
-    container_name: lam-nginx
-    # 网络
-    networks:
-      - localnet
-    # 端口映射
-    ports:
-      # 这里是映射原本的80端口
-      - 9090:80
-      # 映射自定义端口
-      - 3008:3008
-    # 外部挂载
-    volumes:
-      # 首页
-      - D:/Daturm/DockerVolume/nginx/html:/usr/share/nginx/html
-      # 配置
-      - D:/Daturm/DockerVolume/nginx/conf/nginx.conf:/etc/nginx/nginx.conf
-      - D:/Daturm/DockerVolume/nginx/conf/conf.d:/etc/nginx/conf.d
-      # 日志
-      - D:/Daturm/DockerVolume/nginx/logs:/var/log/nginx
-    depends_on:
-      lam:
-        condition: service_healthy
-
-# 网络配置
-networks:
-  # 链接到本地的localnet中
-  localnet:
-    external: true
-```
+* `.env`
+  
+  ```env
+  # 程序资源存放路径
+  PROGRAM_SOURCE_PATH=D:/Daturm/LemonAccountMaster
+  # Docker外部挂载路径
+  DOCKER_VOLUME_PATH=D:/Daturm/DockerVolume
+  ```
 
 ### 静态资源配置
 
@@ -276,7 +287,7 @@ networks:
    
    ![](README.assets/2023-04-18-21-27-47-image.png)
    
-   **lam.conf**
+   `lam.conf`
    
    ```config
    server {
@@ -286,17 +297,17 @@ networks:
    
        location / {
            root   /usr/share/nginx/html/dist;
-   		try_files $uri $uri/ /index.html;
+           try_files $uri $uri/ /index.html;
            index  index.html index.htm;
        }
    
        location /prod-api/ {
-   		proxy_set_header Host $http_host;
-   		proxy_set_header X-Real-IP $remote_addr;
-   		proxy_set_header REMOTE-HOST $remote_addr;
-   		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-   		proxy_pass http://lam:8080/;
-   	}
+           proxy_set_header Host $http_host;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header REMOTE-HOST $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           proxy_pass http://lam:8080/;
+       }
    
        location /profile/upload/ {
            proxy_pass http://lam:8080/profile/upload/;
@@ -308,12 +319,11 @@ networks:
        }
    
    }
-   
    ```
 
 3. 重启nginx容器，使配置重新生效
    
-   ```shell
+   ```sh
    docker restart lam-nginx
    ```
 
