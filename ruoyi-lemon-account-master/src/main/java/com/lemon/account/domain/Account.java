@@ -37,19 +37,29 @@ public class Account extends BaseEntity {
     private String ancestors;
 
     /**
-     * 账户说明
+     * 子级列表
      */
-    private String accountInfo;
+    private String posterities;
+
+    /**
+     * 账号节点名
+     */
+    private String accountNodeName;
 
     /**
      * 用户名
      */
-    private String accountName;
+    private String accountUserName;
 
     /**
-     * 密码
+     * 用户密码
      */
-    private String accountPassword;
+    private String accountUserPwd;
+
+    /**
+     * 账号说明
+     */
+    private String accountInfo;
 
     /**
      * key值偏移量iv
@@ -60,11 +70,5 @@ public class Account extends BaseEntity {
      * 账号域名
      */
     private String accountDomain;
-
-    /**
-     * 删除标志（0代表存在 2代表删除）
-     */
-    // @TableLogic
-    private String delFlag;
 
 }

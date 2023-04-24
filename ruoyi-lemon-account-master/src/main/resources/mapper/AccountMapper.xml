@@ -11,12 +11,13 @@
         <result column="update_time" property="updateTime"/>
         <result column="parent_id" property="parentId"/>
         <result column="ancestors" property="ancestors"/>
-        <result column="account_name" property="accountName"/>
-        <result column="account_password" property="accountPassword"/>
+        <result column="posterities" property="posterities"/>
+        <result column="account_node_name" property="accountNodeName"/>
+        <result column="account_user_name" property="accountUserName"/>
+        <result column="account_user_pwd" property="accountUserPwd"/>
         <result column="account_key_iv" property="accountKeyIv"/>
         <result column="account_info" property="accountInfo"/>
         <result column="account_domain" property="accountDomain"/>
-        <result column="del_flag" property="delFlag"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -24,12 +25,13 @@
         select account_id,
                parent_id,
                ancestors,
-               account_name,
-               account_password,
+               posterities,
+               account_node_name,
+               account_user_name,
+               account_user_pwd,
                account_key_iv,
-               account_info,
                account_domain,
-               del_flag,
+               account_info,
                create_by,
                create_time,
                update_by,
@@ -39,8 +41,7 @@
 
     <select id="selectAccountsByUserId" parameterType="long" resultMap="AccountResult">
         <include refid="selectAccountVO"/>
-        where del_flag = '0'
-        and a.account_id in(
+        where a.account_id in(
         select b.account_id from lam_user_account as b
         where b.user_id=#{userId}
         )

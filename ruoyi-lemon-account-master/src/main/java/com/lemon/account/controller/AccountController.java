@@ -6,7 +6,6 @@ import com.lemon.account.domain.Account;
 import com.lemon.account.domain.UserAccount;
 import com.lemon.account.service.impl.AccountServiceImpl;
 import com.lemon.account.service.impl.UserAccountServiceImpl;
-import com.ruoyi.common.config.LemonConfig;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -17,8 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * <p>
@@ -44,64 +41,41 @@ public class AccountController extends BaseController {
     private final UserAccountServiceImpl userAccountService;
 
     /**
-     * 柠檬配置项
-     */
-    private final LemonConfig lemonConfig;
-
-    /**
-     * 分页查询账号列表（含模糊条件查询）
+     * 查询账号列表（含模糊条件查询）
      *
      * @param request 前端传入的查询参数
-     * @return 分页查询的结果集（数据已做脱敏处理）
+     * @return 结果（数据已做脱敏处理）
      */
     @GetMapping("/list")
     public TableDataInfo listAccounts(HttpServletRequest request) {
-
-        String defaultKey = lemonConfig.getDefaultKey();
         // 获取传入的查询参数
-        String accountName = request.getParameter("accountName");
+        String accountNodeName = request.getParameter("accountNodeName");
         String accountInfo = request.getParameter("accountInfo");
         String accountDomain = request.getParameter("accountDomain");
-        boolean isParamAllEmpty = StringUtils.isEmpty(accountName) &&
+        boolean isParamAllEmpty = StringUtils.isEmpty(accountNodeName) &&
                 StringUtils.isEmpty(accountInfo) &&
                 StringUtils.isEmpty(accountDomain);
-        // 不带条件的分页查询
+
+        List<Account> accounts;
         if (isParamAllEmpty) {
-            startPage();
-            return getDataTable(accountService.list());
+            // 不带条件的查询
+            accounts = accountService.list();
+        } else {
+            // 带条件的查询
+            accounts = accountService.list(accountNodeName, accountInfo, accountDomain);
         }
+        TableDataInfo dataTable = getDataTable(accounts);
 
-        // 带条件的分页查询
-        List<Account> accounts = accountService.list(accountName, accountInfo, accountDomain);
-        // 对符合条件的结果进行分页处理
-        int pageNum = Integer.parseInt(request.getParameter("pageNum"));
-        int pageSize = Integer.parseInt(request.getParameter("pageSize"));
-        // 不需要分页
-        if (pageSize >= accounts.size()) {
-            return getDataTable(accounts);
+        // 统计有效账号数量（用户名或者密码不为空的记录）
+        long total = 0L;
+        for (Account account : accounts) {
+            if (StringUtils.isEmpty(account.getAccountUserName()) && StringUtils.isEmpty(account.getAccountUserPwd())) {
+                continue;
+            }
+            total++;
         }
-
-        // 将结果均分成pageSize的List数组
-        List<List<Account>> splitList = Stream.iterate(0, n -> n + 1)
-                .limit(countStep(accounts.size(), pageSize)).parallel()
-                .map(a -> accounts.stream().skip((long) a * pageSize)
-                        .limit(pageSize).parallel().collect(Collectors.toList()))
-                .collect(Collectors.toList());
-        // 设置当前页的结果
-        TableDataInfo dataTable = getDataTable(splitList.get(pageNum - 1));
-        // 这里需要重新设置一下总条数
-        dataTable.setTotal(accounts.size());
+        dataTable.setTotal(total);
         return dataTable;
-    }
-
-    /**
-     * 计算切分次数
-     *
-     * @param listSize List的长度
-     * @param maxSize  一次最大长度
-     */
-    private static Integer countStep(Integer listSize, Integer maxSize) {
-        return (listSize + maxSize - 1) / maxSize;
     }
 
     /**

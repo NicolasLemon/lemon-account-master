@@ -79,8 +79,9 @@ public class AccountAspect {
             // 如果原对象中有keyIv的值的话，就延用该值
             String keyIv = account.getAccountKeyIv();
             keyIv = StringUtils.isNotEmpty(keyIv) ? new String(Base64.decode(keyIv)) : KeyUtils.generateKey(16);
-            account.setAccountName(KeyUtils.aes256Encode(userAesKey, keyIv, account.getAccountName()));
-            account.setAccountPassword(KeyUtils.aes256Encode(userAesKey, keyIv, account.getAccountPassword()));
+            account.setAccountNodeName(KeyUtils.aes256Encode(userAesKey, keyIv, account.getAccountNodeName()));
+            account.setAccountUserName(KeyUtils.aes256Encode(userAesKey, keyIv, account.getAccountUserName()));
+            account.setAccountUserPwd(KeyUtils.aes256Encode(userAesKey, keyIv, account.getAccountUserPwd()));
             account.setAccountInfo(KeyUtils.aes256Encode(userAesKey, keyIv, account.getAccountInfo()));
             account.setAccountDomain(KeyUtils.aes256Encode(userAesKey, keyIv, account.getAccountDomain()));
             keyIv = Base64.encode(keyIv.getBytes(StandardCharsets.UTF_8));
@@ -115,13 +116,10 @@ public class AccountAspect {
         String keyIv = account.getAccountKeyIv();
         // Base64解码偏移量
         keyIv = new String(Base64.decode(keyIv));
-        // 解密账户名
-        account.setAccountName(KeyUtils.aes256Decode(userAesKey, keyIv, account.getAccountName()));
-        // 解密账户密码
-        account.setAccountPassword(KeyUtils.aes256Decode(userAesKey, keyIv, account.getAccountPassword()));
-        // 解密账户说明
+        account.setAccountNodeName(KeyUtils.aes256Decode(userAesKey, keyIv, account.getAccountNodeName()));
+        account.setAccountUserName(KeyUtils.aes256Decode(userAesKey, keyIv, account.getAccountUserName()));
+        account.setAccountUserPwd(KeyUtils.aes256Decode(userAesKey, keyIv, account.getAccountUserPwd()));
         account.setAccountInfo(KeyUtils.aes256Decode(userAesKey, keyIv, account.getAccountInfo()));
-        // 解密账户所属域名
         account.setAccountDomain(KeyUtils.aes256Decode(userAesKey, keyIv, account.getAccountDomain()));
         // 等解密完成后将偏移量置为空（不给用户查看到偏移量）
         account.setAccountKeyIv(null);
