@@ -10,8 +10,6 @@
         <result column="update_by" property="updateBy"/>
         <result column="update_time" property="updateTime"/>
         <result column="parent_id" property="parentId"/>
-        <result column="ancestors" property="ancestors"/>
-        <result column="posterities" property="posterities"/>
         <result column="account_node_name" property="accountNodeName"/>
         <result column="account_user_name" property="accountUserName"/>
         <result column="account_user_pwd" property="accountUserPwd"/>
@@ -24,8 +22,6 @@
     <sql id="selectAccountVO">
         select account_id,
                parent_id,
-               ancestors,
-               posterities,
                account_node_name,
                account_user_name,
                account_user_pwd,

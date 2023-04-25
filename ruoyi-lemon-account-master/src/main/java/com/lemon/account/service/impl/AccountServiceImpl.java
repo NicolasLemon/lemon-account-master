@@ -44,11 +44,6 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     private final static String fakePwd = "******************";
 
     /**
-     * 分隔符
-     */
-    private final static String sep = ",";
-
-    /**
      * 重写list()方法，拼接内部sql，并屏蔽明文密码
      *
      * @param queryWrapper Wrapper
@@ -121,16 +116,6 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         entity.setUpdateBy(null);
         entity.setUpdateTime(null);
 
-        // 设置祖级列表
-        Long parentId = entity.getParentId();
-        if (!Objects.equals(parentId, 0L)) {
-            // 查询上家的祖级节点列表并整合当前祖级节点列表
-            Account one = super.getById(parentId);
-            String ancestors = one.getAncestors() + sep + parentId;
-            ancestors = String.join(sep, StringUtils.str2Set(ancestors, sep));
-            entity.setAncestors(ancestors);
-        }
-
         // 先往账户表中插入或更新一条记录
         boolean isSavedOrUpdated = super.saveOrUpdate(entity);
         // 插入或更新不成功，就返回false
@@ -140,15 +125,6 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
 
         /// 插入或更新成功
         Long accountId = entity.getAccountId();
-        // 设置子孙列表
-        if (!Objects.equals(parentId, 0L)) {
-            Account accountById = super.getById(parentId);
-            String posterities = accountById.getPosterities();
-            posterities += (StringUtils.isEmpty(posterities) ? "" : sep) + accountId;
-            accountById.setPosterities(posterities);
-            super.updateById(accountById);
-        }
-
         // 更新账户与用户关联表
         Long userId = SecurityUtils.getUserId();
         // 通过条件筛选，查询关联表中是否有此记录
@@ -184,62 +160,62 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         if (StringUtils.isNotEmpty(accountNodeName) && StringUtils.isNotEmpty(accountInfo) && StringUtils.isNotEmpty(accountDomain)) {
             log.info("触发【账号节点名称 + 账号说明 + 账号域名】搜索");
             List<Account> list = accounts.stream()
-                    .filter(u -> StringUtils.isNotEmpty(u.getAccountNodeName()) && u.getAccountNodeName().contains(accountNodeName))
-                    .filter(u -> StringUtils.isNotEmpty(u.getAccountInfo()) && u.getAccountInfo().contains(accountInfo))
-                    .filter(u -> StringUtils.isNotEmpty(u.getAccountDomain()) && u.getAccountDomain().contains(accountDomain))
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountNodeName()) && u.getAccountNodeName().toLowerCase().contains(accountNodeName))
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountInfo()) && u.getAccountInfo().toLowerCase().contains(accountInfo))
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountDomain()) && u.getAccountDomain().toLowerCase().contains(accountDomain))
                     .collect(Collectors.toList());
-            return getAncestorsAndPosterities(accounts, list);
+            return getParentsAndSons(accounts, list);
         }
         // 筛选条件2：账号节点名称 + 账号说明
         if (StringUtils.isNotEmpty(accountNodeName) && StringUtils.isNotEmpty(accountInfo)) {
             log.info("触发【账号节点名称 + 账号说明】搜索");
             List<Account> list = accounts.stream()
-                    .filter(u -> StringUtils.isNotEmpty(u.getAccountNodeName()) && u.getAccountNodeName().contains(accountNodeName))
-                    .filter(u -> StringUtils.isNotEmpty(u.getAccountInfo()) && u.getAccountInfo().contains(accountInfo))
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountNodeName()) && u.getAccountNodeName().toLowerCase().contains(accountNodeName))
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountInfo()) && u.getAccountInfo().toLowerCase().contains(accountInfo))
                     .collect(Collectors.toList());
-            return getAncestorsAndPosterities(accounts, list);
+            return getParentsAndSons(accounts, list);
         }
         // 筛选条件3：账号节点名称 + 账号域名
         if (StringUtils.isNotEmpty(accountNodeName) && StringUtils.isNotEmpty(accountDomain)) {
             log.info("触发【账号节点名称 + 账号域名】搜索");
             List<Account> list = accounts.stream()
-                    .filter(u -> StringUtils.isNotEmpty(u.getAccountNodeName()) && u.getAccountNodeName().contains(accountNodeName))
-                    .filter(u -> StringUtils.isNotEmpty(u.getAccountDomain()) && u.getAccountDomain().contains(accountDomain))
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountNodeName()) && u.getAccountNodeName().toLowerCase().contains(accountNodeName))
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountDomain()) && u.getAccountDomain().toLowerCase().contains(accountDomain))
                     .collect(Collectors.toList());
-            return getAncestorsAndPosterities(accounts, list);
+            return getParentsAndSons(accounts, list);
         }
         // 筛选条件4：账号说明 + 账号域名
         if (StringUtils.isNotEmpty(accountInfo) && StringUtils.isNotEmpty(accountDomain)) {
             log.info("触发【账号说明 + 账号域名】搜索");
             List<Account> list = accounts.stream()
-                    .filter(u -> StringUtils.isNotEmpty(u.getAccountInfo()) && u.getAccountInfo().contains(accountInfo))
-                    .filter(u -> StringUtils.isNotEmpty(u.getAccountDomain()) && u.getAccountDomain().contains(accountDomain))
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountInfo()) && u.getAccountInfo().toLowerCase().contains(accountInfo))
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountDomain()) && u.getAccountDomain().toLowerCase().contains(accountDomain))
                     .collect(Collectors.toList());
-            return getAncestorsAndPosterities(accounts, list);
+            return getParentsAndSons(accounts, list);
         }
         // 筛选条件5：账号节点名称
         if (StringUtils.isNotEmpty(accountNodeName)) {
             log.info("触发【账号节点名称】搜索");
             List<Account> list = accounts.stream()
-                    .filter(u -> StringUtils.isNotEmpty(u.getAccountNodeName()) && u.getAccountNodeName().contains(accountNodeName))
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountNodeName()) && u.getAccountNodeName().toLowerCase().contains(accountNodeName))
                     .collect(Collectors.toList());
-            return getAncestorsAndPosterities(accounts, list);
+            return getParentsAndSons(accounts, list);
         }
         // 筛选条件6：账号说明
         if (StringUtils.isNotEmpty(accountInfo)) {
             log.info("触发【账号说明】搜索");
             List<Account> list = accounts.stream()
-                    .filter(u -> StringUtils.isNotEmpty(u.getAccountInfo()) && u.getAccountInfo().contains(accountInfo))
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountInfo()) && u.getAccountInfo().toLowerCase().contains(accountInfo))
                     .collect(Collectors.toList());
-            return getAncestorsAndPosterities(accounts, list);
+            return getParentsAndSons(accounts, list);
         }
         // 筛选条件7：账号域名
         if (StringUtils.isNotEmpty(accountDomain)) {
             log.info("触发【账号域名】搜索");
             List<Account> list = accounts.stream()
-                    .filter(u -> StringUtils.isNotEmpty(u.getAccountDomain()) && u.getAccountDomain().contains(accountDomain))
+                    .filter(u -> StringUtils.isNotEmpty(u.getAccountDomain()) && u.getAccountDomain().toLowerCase().contains(accountDomain))
                     .collect(Collectors.toList());
-            return getAncestorsAndPosterities(accounts, list);
+            return getParentsAndSons(accounts, list);
         }
         return fakeAccountList(accounts);
     }
@@ -251,62 +227,66 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
      * @param list     符合条件的账号记录
      * @return 结果
      */
-    private List<Account> getAncestorsAndPosterities(List<Account> accounts, List<Account> list) {
+    private List<Account> getParentsAndSons(List<Account> accounts, List<Account> list) {
         List<Account> results = new ArrayList<>();
-        // 获取子孙列表
-        results.addAll(getPosterities(accounts, list));
-        // 获取祖先列表
-        results.addAll(getAncestors(accounts, list));
+        list.forEach(a -> {
+            // 获取父亲元素
+            results.addAll(getParents(accounts, a));
+            // 获取孩子元素
+            results.addAll(getSons(accounts, a));
+        });
         // 隐藏用户名和密码
         return fakeAccountList(results);
     }
 
     /**
-     * 递归获取子孙列表
+     * 递归查询当前元素的父亲元素
      *
-     * @param accounts 所有结果
-     * @param list     符合条件的结果
+     * @param accounts 总元素集合
+     * @param account  当前元素
      * @return 结果
      */
-    private List<Account> getPosterities(List<Account> accounts, List<Account> list) {
+    private static List<Account> getParents(List<Account> accounts, Account account) {
         List<Account> results = new ArrayList<>();
-        // 循环符合条件的搜索结果，去找寻它的子孙
-        for (Account account : list) {
-            // 获取子级列表
-            String posterities = account.getPosterities();
-            if (StringUtils.isEmpty(posterities)) {
-                results.add(account);
-                continue;
-            }
-
-            results.add(account);
-            // 筛选出子级列表
-            List<String> strings = StringUtils.str2List(posterities, sep, true, false);
-            List<Account> collect = accounts.stream()
-                    .filter(a -> strings.contains(a.getAccountId().toString()))
-                    .collect(Collectors.toList());
-            // 进入下一层递归
-            results.addAll(getPosterities(accounts, collect));
+        // 如果元素为空，就返回空集合
+        if (ObjectUtils.isEmpty(account)) {
+            return results;
         }
+        results.add(account);
+        Long parentId = account.getParentId();
+        // 顶级节点的父元素ID为0
+        if (parentId.equals(0L)) {
+            return results;
+        }
+        // 筛选出该元素的父亲元素，并递归该父亲元素
+        Account orElse = accounts.stream()
+                .filter(u -> u.getAccountId().equals(parentId))
+                .findFirst().orElse(null);
+        results.addAll(getParents(accounts, orElse));
         return results;
     }
 
     /**
-     * 获取祖先列表
+     * 递归查询当前元素的孩子元素
      *
-     * @param accounts 当前登录用户所有的账号
-     * @param list     符合条件的结果
+     * @param accounts 总元素集合
+     * @param account  当前元素
      * @return 结果
      */
-    private static List<Account> getAncestors(List<Account> accounts, List<Account> list) {
-        List<Account> result = new ArrayList<>();
-        list.forEach(u -> {
-            String ancestors = u.getAncestors();
-            List<String> strings = StringUtils.str2List(ancestors, sep, true, false);
-            List<Account> collect = accounts.stream().filter(a -> strings.contains(a.getAccountId().toString())).collect(Collectors.toList());
-            result.addAll(collect);
-        });
-        return result;
+    private static List<Account> getSons(List<Account> accounts, Account account) {
+        List<Account> results = new ArrayList<>();
+        // 如果当前元素为空，就返回空集合
+        if (ObjectUtils.isEmpty(account)) {
+            return results;
+        }
+        results.add(account);
+        Long accountId = account.getAccountId();
+        Account orElse = accounts.stream()
+                .filter(u -> u.getParentId().equals(accountId))
+                .findFirst().orElse(null);
+        // 筛选出该元素的孩子元素，并递归该孩子元素
+        results.addAll(getSons(accounts, orElse));
+        return results;
     }
 
     /**

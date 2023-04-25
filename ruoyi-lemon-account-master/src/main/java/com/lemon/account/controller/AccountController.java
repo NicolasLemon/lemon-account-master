@@ -61,7 +61,17 @@ public class AccountController extends BaseController {
             // 不带条件的查询
             accounts = accountService.list();
         } else {
-            // 带条件的查询
+            /// 带条件的查询
+            // 无视大小写比较
+            if (StringUtils.isNotEmpty(accountNodeName)) {
+                accountNodeName = accountNodeName.toLowerCase();
+            }
+            if (StringUtils.isNotEmpty(accountInfo)) {
+                accountInfo = accountInfo.toLowerCase();
+            }
+            if (StringUtils.isNotEmpty(accountDomain)) {
+                accountDomain = accountDomain.toLowerCase();
+            }
             accounts = accountService.list(accountNodeName, accountInfo, accountDomain);
         }
         TableDataInfo dataTable = getDataTable(accounts);

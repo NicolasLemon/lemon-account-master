@@ -32,16 +32,6 @@ public class Account extends BaseEntity {
     private Long parentId;
 
     /**
-     * 祖级列表
-     */
-    private String ancestors;
-
-    /**
-     * 子级列表
-     */
-    private String posterities;
-
-    /**
      * 账号节点名
      */
     private String accountNodeName;
