@@ -281,11 +281,11 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         }
         results.add(account);
         Long accountId = account.getAccountId();
-        Account orElse = accounts.stream()
+        List<Account> list = accounts.stream()
                 .filter(u -> u.getParentId().equals(accountId))
-                .findFirst().orElse(null);
+                .collect(Collectors.toList());
         // 筛选出该元素的孩子元素，并递归该孩子元素
-        results.addAll(getSons(accounts, orElse));
+        list.forEach(v -> results.addAll(getSons(accounts, v)));
         return results;
     }
 
