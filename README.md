@@ -2,9 +2,9 @@
 
 # 介绍
 
-基于RuoYi3.8.5 + MyBatis-Plus3.5.1开发的账户管理系统，
+基于RuoYi3.8.5 + MyBatis-Plus3.5.1开发的账号管理系统，
 
-一站式管理个人名下的所有的账户密码，数据做到层层加密，
+一站式管理个人名下的所有的账号密码，数据做到层层加密，
 
 哪怕数据库被撞开，也无法破译里面的信息，安全性极高。
 
@@ -12,29 +12,29 @@
 
 ## 个人账号管理
 
-**账号总览**
+* **账号总览**
+  
+  ![](README.assets/2023-04-25-10-59-42-image.png)
 
-![](README.assets/2023-04-18-20-15-28-image.png)
+* **条件搜索**
+  
+  ![](README.assets/2023-04-25-11-00-23-image.png)
 
-**条件搜索**
+* **密码查看**
+  
+  ![](README.assets/2023-04-25-11-00-52-image.png)
 
-![](README.assets/2023-04-18-20-15-02-image.png)
+* **账号新增**
+  
+  ![](README.assets/2023-04-25-11-01-22-image.png)
 
-**密码查看**
+* **账号修改**
+  
+  ![](README.assets/2023-04-25-11-01-45-image.png)
 
-![](README.assets/2023-04-18-20-18-43-image.png)
-
-**账号新增**
-
-![](README.assets/2023-04-18-20-16-51-image.png)
-
-**账号修改**
-
-![](README.assets/2023-04-18-20-17-27-image.png)
-
-**账号移除**
-
-![](README.assets/2023-04-18-20-19-35-image.png)
+* **账号移除**
+  
+  ![](README.assets/2023-04-25-11-02-03-image.png)
 
 ## 数据极限加密
 
@@ -59,11 +59,11 @@ http://localhost:8080/lam/key/
 
 ![](README.assets/2023-04-15-19-31-06-image.png)
 
-# 项目部署
+# Docker部署
 
 * 基础部署可以参考：[环境部署 | RuoYi](http://doc.ruoyi.vip/ruoyi-vue/document/hjbs.html#%E9%83%A8%E7%BD%B2%E7%B3%BB%E7%BB%9F)
 
-## Docker-Compose
+**注：** 本次部署环境全用`Docker-Compose`实现
 
 所需环境全用Docker部署（`MySQL8` + `Redis` + `Nginx`）
 
@@ -99,7 +99,7 @@ npm run build:prod
 
 * 更改默认密钥（可选）
   
-  注意，更改默认密钥后，初始的两个用户的默认密钥也要做出相应修改，这里简易用超管账户登录后重新创建一个用户，再将这个账户设为超管账户。
+  注意，更改默认密钥后，初始的两个用户的默认密钥也要做出相应修改，这里简易用超管账号登录后重新创建一个用户，再将这个账号设为超管账号。
   
   ![](README.assets/2023-04-18-20-47-15-image.png)
 
@@ -111,7 +111,7 @@ npm run build:prod
 
 ##### 创建docker镜像
 
-将上面打包好的`ruoyi-admin.jar`和项目中的`DOCKERFILE`放在同一目录下
+将上面打包好的`ruoyi-admin.jar`和项目中的`Dockerfile`放在同一目录下
 
 ```sh
 docker build -t lam-master .
@@ -119,7 +119,7 @@ docker build -t lam-master .
 
 ![](README.assets/2023-04-18-21-03-59-image.png)
 
-### 环境部署
+### 后端环境部署
 
 #### 创建网络
 
@@ -172,7 +172,7 @@ docker-compose up -d
       # 外部挂载
       volumes:
         # 日志
-        - ${LAM_PATH}/logs:/logs
+        - ${PROGRAM_SOURCE}/logs:/logs
       # 健康检查
       healthcheck:
         # http://localhost:8080/heart/ 为容器指定的健康检查接口
@@ -281,6 +281,8 @@ docker-compose up -d
 
 1. 将前面打包好的前端`dist`文件夹放入nginx外部挂载文件夹中
    
+   并将`dist`文件夹更名为`lam`文件夹
+   
    ![](README.assets/2023-04-18-21-25-31-image.png)
 
 2. 修改nginx配置
@@ -296,7 +298,7 @@ docker-compose up -d
        server_name  localhost;
    
        location / {
-           root   /usr/share/nginx/html/dist;
+           root   /usr/share/nginx/html/lam;
            try_files $uri $uri/ /index.html;
            index  index.html index.htm;
        }
@@ -335,4 +337,4 @@ http://localhost:3008/
 
 ![](README.assets/2023-04-18-21-29-51-image.png)
 
-![](README.assets/2023-04-18-22-04-29-image.png)
+![](README.assets/2023-04-25-10-55-38-image.png)

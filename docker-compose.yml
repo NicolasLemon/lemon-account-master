@@ -13,7 +13,7 @@ services:
     # 外部挂载
     volumes:
       # 日志
-      - ${LAM_PATH}/logs:/logs
+      - ${PROGRAM_SOURCE}/logs:/logs
     # 健康检查
     healthcheck:
       # http://localhost:8080/heart/ 为容器指定的健康检查接口
