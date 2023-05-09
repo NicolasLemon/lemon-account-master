@@ -2,7 +2,7 @@
  * @Author: Nicolas·Lemon
  * @Date: 2023-04-07 09:59:42
  * @LastEditors: Nicolas·Lemon
- * @LastEditTime: 2023-04-24 14:08:20
+ * @LastEditTime: 2023-05-09 11:22:46
  * @Description: 柠檬账号大师管理页面
 -->
 <template>
@@ -98,6 +98,8 @@
       <el-table-column label="密码" align="center" prop="accountUserPwd" />
       <el-table-column label="账号域名" align="center" prop="accountDomain" />
       <el-table-column label="账号说明" align="center" prop="accountInfo" />
+      <el-table-column label="创建时间" align="center" prop="createTime" />
+      <el-table-column label="修改时间" align="center" prop="updateTime" />
       <el-table-column
         label="操作"
         align="center"
