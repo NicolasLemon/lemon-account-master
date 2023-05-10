@@ -2,7 +2,7 @@
  * @Author: Nicolas·Lemon
  * @Date: 2023-04-07 09:59:42
  * @LastEditors: Nicolas·Lemon
- * @LastEditTime: 2023-05-09 11:22:46
+ * @LastEditTime: 2023-05-10 09:33:37
  * @Description: 柠檬账号大师管理页面
 -->
 <template>
@@ -92,14 +92,33 @@
       row-key="accountId"
       :default-expand-all="isExpandAll"
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
+      :max-height="tableHeight"
     >
       <el-table-column label="节点名" prop="accountNodeName" />
       <el-table-column label="用户名" align="center" prop="accountUserName" />
       <el-table-column label="密码" align="center" prop="accountUserPwd" />
       <el-table-column label="账号域名" align="center" prop="accountDomain" />
       <el-table-column label="账号说明" align="center" prop="accountInfo" />
-      <el-table-column label="创建时间" align="center" prop="createTime" />
-      <el-table-column label="修改时间" align="center" prop="updateTime" />
+      <el-table-column label="创建时间" align="center">
+        <template slot-scope="scope">
+          {{
+            scope.row.accountUserName !== null ||
+            scope.row.accountUserPwd !== null
+              ? scope.row.createTime
+              : ""
+          }}
+        </template>
+      </el-table-column>
+      <el-table-column label="修改时间" align="center">
+        <template slot-scope="scope">
+          {{
+            scope.row.accountUserName !== null ||
+            scope.row.accountUserPwd !== null
+              ? scope.row.updateTime
+              : ""
+          }}
+        </template>
+      </el-table-column>
       <el-table-column
         label="操作"
         align="center"
@@ -199,6 +218,8 @@ export default {
   },
   data() {
     return {
+      // 表格最大高度
+      tableHeight: 0,
       // 行账号密码临时缓存列表
       rowPwdList: [],
       // 遮罩层
@@ -464,6 +485,18 @@ export default {
       if (idx >= 0) {
         this.rowPwdList.splice(idx, 1);
       }
+    },
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.tableHeight = window.innerHeight - 211;
+    });
+  },
+  watch: {
+    // 监听 showSearch 的值，动态修改表格的最大高度
+    showSearch(value) {
+      const h = value === true ? 211 : 161;
+      this.tableHeight = window.innerHeight - h;
     },
   },
 };
